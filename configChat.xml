@@ -1,0 +1,16 @@
+<<<<<<< HEAD
+<?xml version="1.0"?>
+<setings>
+    <port>8090</port>
+    <server_pc></server_pc>
+    <size_history>10</size_history>
+    <size_max_clients>10</size_max_clients>
+=======
+<?xml version="1.0"?>
+<setings>
+    <port>8090</port>
+    <server_pc></server_pc>
+    <size_history>10</size_history>
+    <size_max_clients>10</size_max_clients>
+>>>>>>> 5768538... Сохранение перед глобальной переработкой
+</setings>

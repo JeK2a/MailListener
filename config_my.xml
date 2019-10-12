@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<setings>
+    <user>jek2a</user>
+    <password>zo3s24tlkr</password>
+    <host>93.189.150.244</host>
+    <port>3306</port>
+    <schema>tdf_asyst</schema>
+    <usessl>false</usessl>
+    <useunicode>true</useunicode>
+    <characterencoding>utf-8</characterencoding>
+    <table_users>a_my_users_emails</table_users>
+    <table_settings>a_my_emails_settings</table_settings>
+    <table_emails>a_api_emails</table_emails>
+    <table_folders>a_api_email_folders</table_folders>
+    <mail_debug>false</mail_debug>
+    <session_debug>false</session_debug>
+    <wait_folder>false</wait_folder>
+    <wait_user>true</wait_user>
+</setings>

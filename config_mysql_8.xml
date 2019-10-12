@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<setings>
+    <user>root</user>
+    <password>rootroot</password>
+    <host>localhost</host>
+    <port>3306</port>
+    <schema>test</schema>
+    <usessl>false</usessl>
+    <useunicode>true</useunicode>
+    <characterencoding>utf-8</characterencoding>
+    <table_users>a_my_users_emails</table_users>
+    <table_emails>a_api_emails</table_emails>
+    <mail_debug>false</mail_debug>
+    <session_debug>false</session_debug>
+</setings>
