@@ -245,8 +245,8 @@ public class DB implements AutoCloseable {
             "       `settings`.`type` = 'imap'  " +
             "WHERE " +
 //                "   `id` = 55 AND " +
-            "   `users`.`email` = \"me@tdfort.ru\" " +
-//            "   `users`.`is_monitoring` = 1 " +
+//            "   `users`.`email` = \"me@tdfort.ru\" " +
+            "   `users`.`is_monitoring` = 1 " +
             "ORDER  BY `users`.`email`;"
 //                +
 //                "`success` = 1"

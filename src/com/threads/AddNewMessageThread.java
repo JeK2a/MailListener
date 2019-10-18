@@ -454,6 +454,8 @@ public class AddNewMessageThread implements Runnable {
         int sqrt  = 0;
 
         try {
+            checkFolder(imap_folder);
+
             Message last_message = imap_folder.getMessageByUID(last_uid_db);
             if (last_message == null) {
 //                return Boolean.parseBoolean(null);
@@ -487,6 +489,12 @@ public class AddNewMessageThread implements Runnable {
         }
 
         return (sqrt == check_count);
+    }
+
+    private void checkFolder(IMAPFolder imapFolder) throws MessagingException {
+        if (!imapFolder.isOpen()) {
+            imapFolder.open(Folder.READ_ONLY);
+        }
     }
 
     private void addFolderListenersConnection(IMAPFolder imap_folder) {

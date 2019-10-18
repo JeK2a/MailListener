@@ -5,7 +5,10 @@ import com.classes.EmailAccount;
 import com.classes.MyFolder;
 import com.classes.User;
 import com.db.DB;
+import com.sun.mail.imap.IMAPFolder;
 
+import javax.mail.Folder;
+import javax.mail.MessagingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
@@ -46,18 +49,16 @@ public class Mailing implements Runnable {
                         break;
                     }
 
-//                    checkAccounts();
+                    checkAccounts();
                     Thread.sleep(20000);
                 }
             }
 
             while (true) {
-//                checkAccounts();
+                checkAccounts();
                 Thread.sleep(120000);
 //                Thread.sleep(20000);
             }
-
-
 
         } catch (Exception e) {
             System.err.println("ERROR");
@@ -66,9 +67,7 @@ public class Mailing implements Runnable {
     }
 
     private void checkAccounts() {
-//        System.err.println("Test 1");
         for (Map.Entry<String, EmailAccount> accountEntry : emailAccounts.entrySet()) {
-//            System.err.println("Test 2");
 
             EmailAccount emailAccount = accountEntry.getValue();
             MailingEmailAccountThread mailingEmailAccount_tmp = new MailingEmailAccountThread(emailAccount);
@@ -79,7 +78,7 @@ public class Mailing implements Runnable {
                     emailAccount.getTime_reconnect() < (new Date().getTime() / 1000 - 360)
             ) {
                 for (Map.Entry<String, MyFolder> folderEntry : emailAccount.getMyFoldersMap().entrySet()) {
-                    folderEntry.getValue().getThread().stop();
+                    rebootFolder(folderEntry.getValue());
                     emailAccount.getMyFoldersMap().remove(folderEntry.getKey());
                 }
 
@@ -93,20 +92,40 @@ public class Mailing implements Runnable {
             for (Map.Entry<String, MyFolder> folderEntry : emailAccount.getMyFoldersMap().entrySet()) {
 //                MyFolder myFolder = folderEntry.getValue();
 
+                MyFolder myFolder_tmp = folderEntry.getValue();
+
                 if (
 //                        true
-//                        folderEntry.getValue().getThread_problem() > 0 &&
-                        folderEntry.getValue().getTime_last_noop() < (new Date().getTime() / 1000 - 360)
+//                        myFolder_tmp.getThread_problem() > 0 &&
+                        myFolder_tmp.getStatus().equals("error")  ||
+                        myFolder_tmp.getStatus().equals("closed") ||
+                        (myFolder_tmp.getTime_last_noop() < (new Date().getTime() / 1000 - 360))
                 ) {
-//                    System.err.println("Test 4");
-                    folderEntry.getValue().getThread().stop();
-//                    System.err.println("Test 5");
+                    rebootFolder(folderEntry.getValue());
                     emailAccount.getMyFoldersMap().remove(folderEntry.getKey());
-//                    System.err.println("Test 6");
                     mailingEmailAccount_tmp.addFolder(folderEntry.getValue().getImap_folder());
-//                    System.err.println("Test 7");
                 }
             }
+        }
+    }
+
+    private void rebootFolder(MyFolder folder_tmp) {
+        try {
+            IMAPFolder imapFolder_tmp = folder_tmp.getImap_folder();
+
+            if (imapFolder_tmp.isOpen()) {
+                imapFolder_tmp.close();
+            }
+
+            Thread.sleep(1000);
+
+            if (imapFolder_tmp.isOpen()) {
+                imapFolder_tmp.forceClose();
+            }
+
+            folder_tmp.getThread().stop();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

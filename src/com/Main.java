@@ -8,13 +8,10 @@ import java.util.HashMap;
 
 public class Main {
 
-    private static int db_i                   = 0;
-    public static Thread mailing_tread        = null;
-    public static DB db                       = new DB();
-    public static boolean is_restart          = true;
-
-
-
+    private static int db_i            = 0;
+    public static Thread mailing_tread = null;
+    public static DB db                = new DB();
+    public static boolean is_restart   = true;
 
     public static void main(String[] args) {
         try {

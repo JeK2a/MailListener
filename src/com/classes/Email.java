@@ -3,6 +3,7 @@ package com.classes;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
+import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
@@ -53,9 +54,9 @@ public class Email {
 
     public Email(int user_id, String email_account, Message imap_message, String folder_name, IMAPFolder imapFolder) {
         try {
-//            if (!imapFolder.isOpen()) {
-//                imapFolder.open(Folder.READ_ONLY);
-//            }
+            if (!imapFolder.isOpen()) {
+                imapFolder.open(Folder.READ_ONLY);
+            }
 
             long uid = imapFolder.getUID(imap_message);
 
