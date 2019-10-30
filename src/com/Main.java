@@ -97,40 +97,40 @@ public class Main {
 //        }
 //    }
 
-    public static void countThreads(ThreadGroup group, String indent) {
-        System.out.println(indent + "Group[" + group.getName() + " : " + group.getClass()+"]");
-
-        int nt = group.activeCount();
-        Thread[] threads = new Thread[nt * 2 + 10]; //nt is not accurate
-        nt = group.enumerate(threads, false);
-
-        // List every thread in the group
-
-        HashMap<String, Integer> hashMap = new HashMap<>();
-
-        for (int i = 0; i < nt; i++) {
-            Thread thread = threads[i];
-
-            String threadName = thread.getName();
-            String[] arr_srt = threadName.split(" ");
-
-            if (arr_srt.length > 1) {
-                threadName = arr_srt[0];
-            }
-
-            hashMap.compute(threadName, (key, value) -> (value == null) ? 1 : value + 1);
-        }
-
-        hashMap.forEach((key, value) -> System.out.println("    Threads[" + key + " count " + value + "]"));
-
-        // Recursively list all subgroups
-        int ng = group.activeGroupCount();
-        ThreadGroup[] groups = new ThreadGroup[ng * 2 + 10];
-        ng = group.enumerate(groups, false);
-
-        for (int i = 0; i < ng; i++) {
-            countThreads(groups[i], indent + "  ");
-        }
+    public static void countThreads(ThreadGroup group, String indent) { // TODO раскоментировать
+//        System.out.println(indent + "Group[" + group.getName() + " : " + group.getClass()+"]");
+//
+//        int nt = group.activeCount();
+//        Thread[] threads = new Thread[nt * 2 + 10]; //nt is not accurate
+//        nt = group.enumerate(threads, false);
+//
+//        // List every thread in the group
+//
+//        HashMap<String, Integer> hashMap = new HashMap<>();
+//
+//        for (int i = 0; i < nt; i++) {
+//            Thread thread = threads[i];
+//
+//            String threadName = thread.getName();
+//            String[] arr_srt = threadName.split(" ");
+//
+//            if (arr_srt.length > 1) {
+//                threadName = arr_srt[0];
+//            }
+//
+//            hashMap.compute(threadName, (key, value) -> (value == null) ? 1 : value + 1);
+//        }
+//
+//        hashMap.forEach((key, value) -> System.out.println("    Threads[" + key + " count " + value + "]"));
+//
+//        // Recursively list all subgroups
+//        int ng = group.activeGroupCount();
+//        ThreadGroup[] groups = new ThreadGroup[ng * 2 + 10];
+//        ng = group.enumerate(groups, false);
+//
+//        for (int i = 0; i < ng; i++) {
+//            countThreads(groups[i], indent + "  ");
+//        }
     }
 
 

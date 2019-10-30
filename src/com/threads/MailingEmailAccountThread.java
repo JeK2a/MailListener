@@ -9,6 +9,7 @@ import com.db.DB;
 import com.service.SettingsMail;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
+import com.sun.mail.imap.IdleManager;
 
 import javax.mail.AuthenticationFailedException;
 import javax.mail.Folder;
@@ -20,6 +21,7 @@ import javax.mail.event.FolderEvent;
 import javax.mail.event.FolderListener;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 
 public class MailingEmailAccountThread implements Runnable {
 
@@ -44,7 +46,14 @@ public class MailingEmailAccountThread implements Runnable {
         Session session = Session.getDefaultInstance(myProperties, null); // Создание сессии
         session.setDebug(SettingsMail.getSession_debug());          // Включение дебага
 
+
+
         try {
+            ExecutorService es = myProperties.getEs();
+
+
+
+
             Store store = session.getStore("imap");
 
             String status_tmp = connectToStore(store);
@@ -57,10 +66,16 @@ public class MailingEmailAccountThread implements Runnable {
 
             addStoreListeners(store);
 
+//            IMAPFolder[] imap_folders = {
+//                    (IMAPFolder) store.getFolder("INBOX")
+//                    ,
+//                    (IMAPFolder) store.getFolder("Отправленные")
+//            };
+//            IMAPFolder[] imap_folders = {(IMAPFolder) store.getFolder("INBOX")}; // Получение списка папок для текушего подключения
             IMAPFolder[] imap_folders = (IMAPFolder[]) store.getDefaultFolder().list("*"); // Получение списка папок для текушего подключения
 
             for (IMAPFolder imap_folder: imap_folders) {
-                addFolder(imap_folder);
+                addFolder(imap_folder, session, es);
             }
 
             ConcurrentHashMap<String, MyFolder> myFoldersMap_tmp = emailAccount.getFoldersMap();
@@ -76,9 +91,10 @@ public class MailingEmailAccountThread implements Runnable {
 
                         if (
                             !(
-                                status_tmp.equals("error")                            ||
-                                status_tmp.equals("listening")                        ||
-                                status_tmp.equals("end_add_message_folder")           ||
+                                status_tmp.equals("error")                  ||
+                                status_tmp.equals("listening")              ||
+                                status_tmp.equals("end_add_message_folder") ||
+                                status_tmp.equals("closed")                 ||
                                 status_tmp.equals("close")
                             )
                         ) {
@@ -95,7 +111,7 @@ public class MailingEmailAccountThread implements Runnable {
             emailAccount.setStatus("end");
 
             while (!Thread.interrupted()) {
-                connectToStore(store);
+//                connectToStore(store);
                 Thread.sleep(30000); // TODO java.lang.InterruptedException: sleep interrupted
             }
 
@@ -115,11 +131,13 @@ public class MailingEmailAccountThread implements Runnable {
 
             @Override
             public void disconnected(ConnectionEvent connectionEvent) {
+                emailAccount.setStatus("disconnected");
                 connectToStore(store);
             } // TODO нужно ли реконектится
 
             @Override
             public void closed(ConnectionEvent connectionEvent) {
+                emailAccount.setStatus("closed");
                 connectToStore(store);
             }
         });
@@ -227,10 +245,20 @@ public class MailingEmailAccountThread implements Runnable {
         }
     }
 
-    public void addFolder(IMAPFolder imap_folder) {
-        MyFolder myFolder = new MyFolder(imap_folder);
+//    public void addFolder(IMAPFolder imap_folder) { // TODO test
+//        MyFolder myFolder = new MyFolder(imap_folder);
+//        emailAccount.addMyFolder(myFolder);
+//        Thread myTreadAllMails = new Thread(new AddNewMessageThread(emailAccount, myFolder, imap_folder)); // Создание потока для синхронизации всего почтового ящика
+//        myFolder.setThread(myTreadAllMails);
+//        myTreadAllMails.setName("AddNewMessageThread " + AddNewMessageThread.getIndex());
+//        myTreadAllMails.setDaemon(true);
+//        myTreadAllMails.start();
+//    }
+
+    public void addFolder(IMAPFolder imap_folder, Session session, ExecutorService es) {
+        MyFolder myFolder = new MyFolder(imap_folder, session, es);
         emailAccount.addMyFolder(myFolder);
-        Thread myTreadAllMails = new Thread(new AddNewMessageThread(emailAccount, myFolder, imap_folder)); // Создание потока для синхронизации всего почтового ящика
+        Thread myTreadAllMails = new Thread(new AddNewMessageThread(emailAccount, myFolder, imap_folder, session, es)); // Создание потока для синхронизации всего почтового ящика
         myFolder.setThread(myTreadAllMails);
         myTreadAllMails.setName("AddNewMessageThread " + AddNewMessageThread.getIndex());
         myTreadAllMails.setDaemon(true);

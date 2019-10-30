@@ -58,8 +58,6 @@ public class Email {
                 imapFolder.open(Folder.READ_ONLY);
             }
 
-            long uid = imapFolder.getUID(imap_message);
-
             // TODO проверка на открытую папку
 
             this.email_account = email_account;
@@ -111,43 +109,48 @@ public class Email {
             this.folder = folder_name;
             this.update = new Timestamp(new Date().getTime());
 
+            long uid = imapFolder.getUID(imap_message);
+
+            IMAPFolder imap_folder = (IMAPFolder) imap_message.getFolder();
+
+            if (!imap_folder.isOpen()) {
+                try {
+                    imap_folder.open(IMAPFolder.READ_ONLY);
+                } catch (MessagingException e) {
+                    e.printStackTrace();
+                }
+            }
 
             if (uid > 0) {
                 this.uid = uid;
             } else {
-                IMAPFolder imap_folder = (IMAPFolder) imap_message.getFolder();
-
-                if (!imap_folder.isOpen()) {
-                    try {
-                        imap_folder.open(IMAPFolder.READ_ONLY);
-                    } catch (MessagingException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                String out = (String) imap_folder.doCommand(imapProtocol -> {
-//                    Response[] responses = imapProtocol.command("FETCH " + imap_message.getMessageNumber() + " (FLAGS UID)", null); // TODO
-                    Response[] responses = imapProtocol.command("FETCH " + imap_message.getMessageNumber() + " (FLAGS)", null);
-                    return responses[0].toString();
-                });
-
-                if (out.contains("\\Deleted"))     { this.deleted = 1; }
-                if (out.contains("\\Answered"))    { this.answred = 1; }
-                if (out.contains("\\Draft"))       { this.draft   = 1; }
-                if (out.contains("\\Flagged"))     { this.flagged = 1; }
-    //            if (out.contains("\\Recent"))      { this.recent  = 1; }
-                if (out.contains("\\Seen"))        { this.seen    = 1; }
-    //            if (out.contains("\\User"))        { this.user    = 1; }
-                if (out.contains("$Forvard"))      { this.forwarded = 1; }
-                if (out.contains("$label1"))       { this.label1  = 1; }
-                if (out.contains("$label2"))       { this.label2  = 1; }
-                if (out.contains("$label3"))       { this.label3  = 1; }
-                if (out.contains("$label4"))       { this.label4  = 1; }
-                if (out.contains("$label5"))       { this.label5  = 1; }
-                if (out.contains("$HasAttachment")) { this.has_attachment = 1; }
-
                 this.uid = imap_folder.getUID(imap_message);
             }
+
+            String out = (String) imap_folder.doCommand(imapProtocol -> {
+//                    Response[] responses = imapProtocol.command("FETCH " + imap_message.getMessageNumber() + " (FLAGS UID)", null); // TODO
+                Response[] responses = imapProtocol.command("FETCH " + imap_message.getMessageNumber() + " (FLAGS)", null);
+
+                return responses[0].toString();
+            });
+
+            if (out.contains("\\Deleted"))     { this.deleted = 1; }
+            if (out.contains("\\Answered"))    { this.answred = 1; }
+            if (out.contains("\\Draft"))       { this.draft   = 1; }
+            if (out.contains("\\Flagged"))     { this.flagged = 1; }
+//            if (out.contains("\\Recent"))      { this.recent  = 1; }
+            if (out.contains("\\Seen"))        { this.seen    = 1; }
+//            if (out.contains("\\User"))        { this.user    = 1; }
+            if (out.contains("$Forvard"))      { this.forwarded = 1; }
+            if (out.contains("$label1"))       { this.label1  = 1; }
+            if (out.contains("$label2"))       { this.label2  = 1; }
+            if (out.contains("$label3"))       { this.label3  = 1; }
+            if (out.contains("$label4"))       { this.label4  = 1; }
+            if (out.contains("$label5"))       { this.label5  = 1; }
+            if (out.contains("$HasAttachment")) { this.has_attachment = 1; }
+
+
+
 
 //            Date sent = message.getSentDate();         // когда отправлено
 //            Date received = message.getReceivedDate(); // когда получено

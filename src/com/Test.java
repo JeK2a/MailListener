@@ -90,7 +90,7 @@ public class Test {
 
                         IMAPMessage imapMessage = (IMAPMessage) messageChangedEvent.getMessage();
 
-                        System.out.println("messageChanged");
+//                        System.out.println("messageChanged");
 //                            idleManager.watch(tmp_folder);
 
                         System.out.println("(" + Thread.activeCount() + ")");
@@ -102,7 +102,7 @@ public class Test {
 
 //                    while (true) {
 //                        Thread.sleep(290000);
-//                        idleManager.watch(folder);
+                        idleManager.watch(folder);
 //                    }
                 }
             }

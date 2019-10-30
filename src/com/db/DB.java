@@ -78,8 +78,11 @@ public class DB implements AutoCloseable {
         } catch(Exception e) {
             System.err.println("Не ужалось подключиться к DB");
             e.printStackTrace();
-            System.exit(0);                          // И выйти из программы
-            return false;
+//            System.exit(0);                          // И выйти из программы
+
+            Thread.sleep(30000);
+            return connectToDB();
+//            return false;
         } finally {
             DB.result = result;
             return result;
@@ -115,45 +118,47 @@ public class DB implements AutoCloseable {
             "    `flagged`, "        + //14
             "    `answered`, "       + //15
             "    `deleted`, "        + //16
-            "    `seen`, "           + //17
-            "    `draft`, "          + //18
-            "    `forwarded`, "      + //19
-            "    `label_1`, "        + //20
-            "    `label_2`, "        + //21
-            "    `label_3`, "        + //22
-            "    `label_4`, "        + //23
-            "    `label_5`, "        + //24
-            "    `has_attachment`, " + //25
-            "    `time`, "           + //26
-            "    `email_account`, "  + //27
-            "    `tdf_id` "          + //28
+            "    `removed`, "        + //17
+            "    `seen`, "           + //18
+            "    `draft`, "          + //19
+            "    `forwarded`, "      + //20
+            "    `label_1`, "        + //21
+            "    `label_2`, "        + //22
+            "    `label_3`, "        + //23
+            "    `label_4`, "        + //24
+            "    `label_5`, "        + //25
+            "    `has_attachment`, " + //26
+            "    `time`, "           + //27
+            "    `email_account`, "  + //28
+            "    `tdf_id` "          + //29
             ") "                     +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) " +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) " +
             "    ON DUPLICATE KEY UPDATE " +
-            "        `direction`      = VALUES(`direction`), " +
-            "        `user_id`        = VALUES(`user_id`), " +
-            "        `client_id`      = VALUES(`client_id`), " +
-            "        `message_id`     = VALUES(`message_id`), " +
-            "        `from`           = VALUES(`from`), " +
-            "        `to`             = VALUES(`to`), " +
-            "        `in_reply_to`    = VALUES(`in_reply_to`), " +
-            "        `references`     = VALUES(`references`), " +
-            "        `message_date`   = VALUES(`message_date`), " +
-            "        `size`           = VALUES(`size`), " +
-            "        `subject`        = VALUES(`subject`), " +
-            "        `flagged`        = VALUES(`flagged`), " +
-            "        `answered`       = VALUES(`answered`), " +
-            "        `deleted`        = VALUES(`deleted`), " +
-            "        `seen`           = VALUES(`seen`), " +
-            "        `draft`          = VALUES(`draft`), " +
-            "        `forwarded`      = VALUES(`forwarded`), " +
-            "        `label_1`        = VALUES(`label_1`), " +
-            "        `label_2`        = VALUES(`label_2`), " +
-            "        `label_3`        = VALUES(`label_3`), " +
-            "        `label_4`        = VALUES(`label_4`), " +
-            "        `label_5`        = VALUES(`label_5`), " +
+            "        `direction`      = VALUES(`direction`), "      +
+            "        `user_id`        = VALUES(`user_id`), "        +
+            "        `client_id`      = VALUES(`client_id`), "      +
+            "        `message_id`     = VALUES(`message_id`), "     +
+            "        `from`           = VALUES(`from`), "           +
+            "        `to`             = VALUES(`to`), "             +
+            "        `in_reply_to`    = VALUES(`in_reply_to`), "    +
+            "        `references`     = VALUES(`references`), "     +
+            "        `message_date`   = VALUES(`message_date`), "   +
+            "        `size`           = VALUES(`size`), "           +
+            "        `subject`        = VALUES(`subject`), "        +
+            "        `flagged`        = VALUES(`flagged`), "        +
+            "        `answered`       = VALUES(`answered`), "       +
+            "        `deleted`        = VALUES(`deleted`), "        +
+            "        `removed`        = VALUES(`removed`), "        +
+            "        `seen`           = VALUES(`seen`), "           +
+            "        `draft`          = VALUES(`draft`), "          +
+            "        `forwarded`      = VALUES(`forwarded`), "      +
+            "        `label_1`        = VALUES(`label_1`), "        +
+            "        `label_2`        = VALUES(`label_2`), "        +
+            "        `label_3`        = VALUES(`label_3`), "        +
+            "        `label_4`        = VALUES(`label_4`), "        +
+            "        `label_5`        = VALUES(`label_5`), "        +
             "        `has_attachment` = VALUES(`has_attachment`), " +
-            "        `time`           = VALUES(`time`), " +
+            "        `time`           = VALUES(`time`), "           +
             "        `tdf_id`         = VALUES(`tdf_id`);";
 
         try {
@@ -176,18 +181,19 @@ public class DB implements AutoCloseable {
             prepare_statement_tmp.setInt(14, email.getFlagged());
             prepare_statement_tmp.setInt(15, email.getAnswred());
             prepare_statement_tmp.setInt(16, email.getDeleted());
-            prepare_statement_tmp.setInt(17, email.getSeen());
-            prepare_statement_tmp.setInt(18, email.getDraft());
-            prepare_statement_tmp.setInt(19, email.getForwarded());
-            prepare_statement_tmp.setInt(20, email.getLabel1());
-            prepare_statement_tmp.setInt(21, email.getLabel2());
-            prepare_statement_tmp.setInt(22, email.getLabel3());
-            prepare_statement_tmp.setInt(23, email.getLabel4());
-            prepare_statement_tmp.setInt(24, email.getLabel5());
-            prepare_statement_tmp.setInt(25, email.getHas_attachment());
-            prepare_statement_tmp.setTimestamp(26, email.getUpdate());
-            prepare_statement_tmp.setString(27, email.getEmail_account());
-            prepare_statement_tmp.setString(28, email.getTdf_id());
+            prepare_statement_tmp.setInt(17, 0); // TODO !!!!!
+            prepare_statement_tmp.setInt(18, email.getSeen());
+            prepare_statement_tmp.setInt(19, email.getDraft());
+            prepare_statement_tmp.setInt(20, email.getForwarded());
+            prepare_statement_tmp.setInt(21, email.getLabel1());
+            prepare_statement_tmp.setInt(22, email.getLabel2());
+            prepare_statement_tmp.setInt(23, email.getLabel3());
+            prepare_statement_tmp.setInt(24, email.getLabel4());
+            prepare_statement_tmp.setInt(25, email.getLabel5());
+            prepare_statement_tmp.setInt(26, email.getHas_attachment());
+            prepare_statement_tmp.setTimestamp(27, email.getUpdate());
+            prepare_statement_tmp.setString(28, email.getEmail_account());
+            prepare_statement_tmp.setString(29, email.getTdf_id());
 
             prepare_statement_tmp.executeUpdate();
 
@@ -554,23 +560,24 @@ public class DB implements AutoCloseable {
                 "SELECT `uid` " +
                 "FROM `a_api_emails` " +
                 "WHERE  " +
-                "   `folder` = '" + folder_name  + "' " +
-                "   AND `email_account` = '" + email_address + "' " +
-                "   AND `uid` >= " + uid_start   + " " +
-                "   AND `uid` <= " + uid_end     + " ";
+                "   `folder` = '" + folder_name  + "' AND " +
+                "   `removed` = 0 AND " +
+                "   `email_account` = '" + email_address + "' AND " +
+                "   `uid` >= " + uid_start + " AND " +
+                "   `uid` <= " + uid_end   + " ";
 
         if (uids != null && uids.size() > 0) {
             StringBuilder str_uids = new StringBuilder(String.valueOf(uids.get(0)));
 
             for (int n = 1; n < uids.size(); n++) {
-                str_uids.append(",").append(String.valueOf(uids.get(n)));
+                str_uids.append(",").append(uids.get(n));
             }
 
             query += " AND `uid` IN (" + str_uids + ") ";
         }
 
         try {
-            Statement stmt = con.createStatement();
+            Statement stmt   = con.createStatement();
             ResultSet rs_tmp = stmt.executeQuery(query);
 
             assert uids != null;

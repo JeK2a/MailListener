@@ -36,22 +36,22 @@ public class Mailing implements Runnable {
 
                 addEmailAccount(emailAccount);
 
-                while (true) {
-                    // разделить условия в println выводить revive try / close on error / wait
-                    if (
-                        emailAccount.getStatus().equals("end")                  ||
-                        emailAccount.getStatus().equals("stop")                 ||
-                        emailAccount.getStatus().equals("error")                ||
-                        emailAccount.getStatus().equals("AuthenticationFailed") ||
-                        emailAccount.getStatus().equals("closed")               ||
-                        emailAccount.getStatus().equals("close")
-                    ) {
-                        break;
-                    }
+//                while (true) {
+//                    // разделить условия в println выводить revive try / close on error / wait
+//                    if (
+//                        emailAccount.getStatus().equals("end")                  ||
+//                        emailAccount.getStatus().equals("stop")                 ||
+//                        emailAccount.getStatus().equals("error")                ||
+//                        emailAccount.getStatus().equals("AuthenticationFailed") ||
+//                        emailAccount.getStatus().equals("closed")               ||
+//                        emailAccount.getStatus().equals("close")
+//                    ) {
+//                        break;
+//                    }
 
-                    checkAccounts();
-                    Thread.sleep(20000);
-                }
+                Thread.sleep(15000);
+//                checkAccounts();
+//                }
             }
 
             while (true) {
@@ -72,22 +72,25 @@ public class Mailing implements Runnable {
             EmailAccount emailAccount = accountEntry.getValue();
             MailingEmailAccountThread mailingEmailAccount_tmp = new MailingEmailAccountThread(emailAccount);
 
-            if (
-                    !emailAccount.getStatus().equals("AuthenticationFailed") &&
-                    emailAccount.getThread_problem() > 0 &&
-                    emailAccount.getTime_reconnect() < (new Date().getTime() / 1000 - 360)
-            ) {
-                for (Map.Entry<String, MyFolder> folderEntry : emailAccount.getMyFoldersMap().entrySet()) {
-                    rebootFolder(folderEntry.getValue());
-                    emailAccount.getMyFoldersMap().remove(folderEntry.getKey());
-                }
-
-                accountEntry.getValue().getThread().stop();
-                emailAccounts.remove(accountEntry.getKey());
-                addEmailAccount(emailAccount);
-
-                continue;
-            }
+//            if (
+//                    !(
+//                        emailAccount.getStatus().equals("AuthenticationFailed") ||
+//                        emailAccount.getStatus().equals("error")
+//                    ) &&
+//                    emailAccount.getThread_problem() > 0 &&
+//                    emailAccount.getTime_reconnect() < (new Date().getTime() / 1000 - 360)
+//            ) {
+//                for (Map.Entry<String, MyFolder> folderEntry : emailAccount.getMyFoldersMap().entrySet()) {
+//                    rebootFolder(folderEntry.getValue());
+//                    emailAccount.getMyFoldersMap().remove(folderEntry.getKey());
+//                }
+//
+//                accountEntry.getValue().getThread().stop();
+//                emailAccounts.remove(accountEntry.getKey());
+//                addEmailAccount(emailAccount);
+//
+//                continue;
+//            }
 
             for (Map.Entry<String, MyFolder> folderEntry : emailAccount.getMyFoldersMap().entrySet()) {
 //                MyFolder myFolder = folderEntry.getValue();
@@ -97,13 +100,18 @@ public class Mailing implements Runnable {
                 if (
 //                        true
 //                        myFolder_tmp.getThread_problem() > 0 &&
-                        myFolder_tmp.getStatus().equals("error")  ||
-                        myFolder_tmp.getStatus().equals("closed") ||
-                        (myFolder_tmp.getTime_last_noop() < (new Date().getTime() / 1000 - 360))
+                        myFolder_tmp.getStatus().equals("error")    ||
+                        myFolder_tmp.getStatus().equals("close")    ||
+                        myFolder_tmp.getStatus().equals("closed")   ||
+                        myFolder_tmp.getCount_restart_success() > 1 ||
+                        (
+                            myFolder_tmp.getThread_problem() > 0 &&
+                            myFolder_tmp.getTime_last_noop() < (new Date().getTime() / 1000 - 360)
+                        )
                 ) {
                     rebootFolder(folderEntry.getValue());
                     emailAccount.getMyFoldersMap().remove(folderEntry.getKey());
-                    mailingEmailAccount_tmp.addFolder(folderEntry.getValue().getImap_folder());
+                    mailingEmailAccount_tmp.addFolder(folderEntry.getValue().getImap_folder(), folderEntry.getValue().getSession(), folderEntry.getValue().getEs());
                 }
             }
         }

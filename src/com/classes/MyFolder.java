@@ -3,8 +3,10 @@ package com.classes;
 import com.sun.mail.imap.IMAPFolder;
 
 import javax.mail.MessagingException;
+import javax.mail.Session;
 import java.util.Base64;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
 
 public class MyFolder implements Cloneable {
     private volatile String folder_name;
@@ -27,6 +29,9 @@ public class MyFolder implements Cloneable {
 
     private long time_reconnect = -1;
     private int thread_problem = 0;
+
+    private Session session;
+    private ExecutorService es;
 
     public Thread getThread() {
         return thread;
@@ -63,6 +68,7 @@ public class MyFolder implements Cloneable {
     public void incrementCount_restart_success() {
         this.count_restart_success++;
     }
+
     public void incrementCount_restart_noop() {
         this.count_restart_noop++;
     }
@@ -150,9 +156,12 @@ public class MyFolder implements Cloneable {
         }
     }
 
-    public MyFolder(IMAPFolder imap_folder) {
+    public MyFolder(IMAPFolder imap_folder, Session session, ExecutorService es) {
         this.folder_name     = imap_folder.getFullName();
         this.imap_folder     = imap_folder;
+
+        this.session = session;
+        this.es = es;
     }
 
     public String getFolder_name() {
@@ -242,6 +251,19 @@ public class MyFolder implements Cloneable {
 //
 //        return messages_count;
 //    }
+
+
+    public int getCount_restart_noop() {
+        return count_restart_noop;
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    public ExecutorService getEs() {
+        return es;
+    }
 
     @Override
     public String toString() {

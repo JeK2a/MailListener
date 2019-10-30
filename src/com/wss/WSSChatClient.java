@@ -113,6 +113,8 @@ public class WSSChatClient {
             result = true;
         } catch (com.neovisionaries.ws.client.WebSocketException e) {
             System.out.println("Не удалось переподключиться к WSS сокету");
+            Thread.sleep(30000);
+            return connectToWSS();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
