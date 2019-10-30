@@ -31,3 +31,4 @@ out/
 /dataSources/
 /dataSources.local.xml
 /.idea/
+config_my.xml
