@@ -132,6 +132,7 @@ public class Mailing implements Runnable {
             }
 
             folder_tmp.getThread().stop();
+            folder_tmp.getIdleManager().stop();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -10,6 +10,7 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IdleManager;
+import com.sun.xml.internal.ws.api.model.wsdl.WSDLOutput;
 
 import javax.mail.*;
 import javax.mail.event.ConnectionEvent;
@@ -38,6 +39,7 @@ public class AddNewMessageThread implements Runnable {
 
     private Session session;
     private ExecutorService es;
+
 
 //    public AddNewMessageThread(EmailAccount emailAccount, MyFolder myFolder, IMAPFolder imap_folder) {
 //        if (db == null) {
@@ -76,7 +78,7 @@ public class AddNewMessageThread implements Runnable {
         long messages_count_db;
 
         try {
-            IdleManager idleManager = new IdleManager(session, es);
+            myFolder.setIdleManager(new IdleManager(session, es));
 
             if (!reopenFolder("start")) {
                 myFolder.setStatus("closed");
@@ -138,7 +140,9 @@ public class AddNewMessageThread implements Runnable {
                     }
                 }
 
-                idleManager.watch(imap_folder);
+                myFolder.getIdleManager().watch(imap_folder); // TODO
+
+//                idleManager.stop();
 
                 Thread.sleep(noop_sleep);
             }
@@ -159,7 +163,10 @@ public class AddNewMessageThread implements Runnable {
 
         try {
             if (!imap_folder.isOpen()) {
-                imap_folder.open(IMAPFolder.READ_ONLY);
+                Thread.sleep(1000);
+                if (!imap_folder.isOpen()) {
+                    imap_folder.open(IMAPFolder.READ_ONLY);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -455,6 +462,8 @@ public class AddNewMessageThread implements Runnable {
                                 arr_uids
                         );
 
+
+                        reopenFolder("fetchMessages");
                         fetchMessages(
                             imap_folder.getMessagesByUID(
                                 uids_tmp
@@ -497,15 +506,22 @@ public class AddNewMessageThread implements Runnable {
             flags.put("UNSEEN",   null);
 
             for (HashMap.Entry<String, String> flag : flags.entrySet()) {
+
                 flag.setValue((String) imap_folder.doCommand(imapProtocol -> {
                     StringBuilder str_uids = new StringBuilder();
-                    Response[] responses = imapProtocol.command("UID SEARCH " + flag.getKey(), null);
-                    String[] arr_out_str = responses[0].toString().split(" ");
+                    Response[] responses   = imapProtocol.command("UID SEARCH " + flag.getKey(), null);
+                    String[] arr_out_str   = responses[0].toString().split(" ");
+
+//                    System.out.println(responses[0]);
+
+                    if (arr_out_str.length > 2 && !(Integer.parseInt(arr_out_str[2]) > 0)) {
+                        System.err.println(Arrays.toString(responses));
+                    }
 
                     if (arr_out_str.length > 2) {
                         str_uids = new StringBuilder(arr_out_str[2]);
 
-                        for (int n = 3; n < arr_out_str.length; n++) {
+                        for (int n = 2; n < arr_out_str.length; n++) {
                             str_uids.append(",").append(arr_out_str[n]);
                         }
                     }
@@ -617,7 +633,7 @@ public class AddNewMessageThread implements Runnable {
 //                messages = imap_folder.getMessagesByUID(last_uid_db + 1, last_uid_mail);
 //                fetchMessages(messages);
 
-                System.err.println("opened !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+//                System.err.println("opened !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
                 checkRemoved(email_address, folder_name);
                 myFolder.setStatus("listening");

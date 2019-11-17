@@ -3,6 +3,7 @@ package com;
 import com.classes.EmailAccount;
 import com.classes.User;
 import com.db.DB;
+import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IdleManager;
@@ -45,69 +46,79 @@ public class Test {
 
 //                Folder folder = store.getFolder("INBOX");
 
-                IMAPFolder[] folders = (IMAPFolder[]) store.getDefaultFolder().list("*");
+//                IMAPFolder[] folders = (IMAPFolder[]) store.getDefaultFolder().list("*");
+                IMAPFolder[] folders = {(IMAPFolder) store.getFolder("Отправленные")};
 
 //                IMAPFolder folder = (IMAPFolder) store.getDefaultFolder().list("INBOX")[0];
                 for (IMAPFolder folder : folders) {
 
                     folder.open(Folder.READ_WRITE);
 
-                    folder.addMessageCountListener(new MessageCountListener() {
-                        @Override
-                        public void messagesAdded(MessageCountEvent messageCountEvent) {
-                            try {
-                                IMAPFolder tmp_folder = (IMAPFolder) messageCountEvent.getMessages()[0].getFolder();
-
-                                System.out.println("messagesAdded");
-                                idleManager.watch(tmp_folder);
-
-                                System.out.println("(" + Thread.activeCount() + ")");
-                            } catch (MessagingException ex) {
-                                ex.printStackTrace();
-                            }
-                        }
-
-                        @Override
-                        public void messagesRemoved(MessageCountEvent messageCountEvent) {
-                            try {
-                                IMAPFolder tmp_folder = (IMAPFolder) messageCountEvent.getMessages()[0].getFolder();
-
-                                System.out.println("messagesRemoved");
-                                idleManager.watch(tmp_folder);
-
-                                System.out.println("(" + Thread.activeCount() + ")");
-                            } catch (MessagingException ex) {
-                                ex.printStackTrace();
-                            }
-                        }
-                    });
+//                    folder.addMessageCountListener(new MessageCountListener() {
+//                        @Override
+//                        public void messagesAdded(MessageCountEvent messageCountEvent) {
+//                            try {
+//                                IMAPFolder tmp_folder = (IMAPFolder) messageCountEvent.getMessages()[0].getFolder();
+//
+//                                System.out.println("messagesAdded");
+//                                idleManager.watch(tmp_folder);
+//
+//                                System.out.println("(" + Thread.activeCount() + ")");
+//                            } catch (MessagingException ex) {
+//                                ex.printStackTrace();
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void messagesRemoved(MessageCountEvent messageCountEvent) {
+//                            try {
+//                                IMAPFolder tmp_folder = (IMAPFolder) messageCountEvent.getMessages()[0].getFolder();
+//
+//                                System.out.println("messagesRemoved");
+//                                idleManager.watch(tmp_folder);
+//
+//                                System.out.println("(" + Thread.activeCount() + ")");
+//                            } catch (MessagingException ex) {
+//                                ex.printStackTrace();
+//                            }
+//                        }
+//                    });
 
 //                idleManager.watch(folder); // keep watching for new messages // TODO ??????????????
 
-                    folder.addMessageChangedListener((MessageChangedEvent messageChangedEvent) -> {
-//                        IMAPFolder tmp_folder = (IMAPFolder) messageChangedEvent.getMessage().getFolder();
-
-
-                        IMAPMessage imapMessage = (IMAPMessage) messageChangedEvent.getMessage();
-
-//                        System.out.println("messageChanged");
-//                            idleManager.watch(tmp_folder);
-
-                        System.out.println("(" + Thread.activeCount() + ")");
-                    });
+//                    folder.addMessageChangedListener((MessageChangedEvent messageChangedEvent) -> {
+////                        IMAPFolder tmp_folder = (IMAPFolder) messageChangedEvent.getMessage().getFolder();
+//
+//
+//                        IMAPMessage imapMessage = (IMAPMessage) messageChangedEvent.getMessage();
+//
+////                        System.out.println("messageChanged");
+////                            idleManager.watch(tmp_folder);
+//
+//                        System.out.println("(" + Thread.activeCount() + ")");
+//                    });
 
                     System.out.println(emailAccount.getEmailAddress() + " - " + folder.getFullName());
 
-                    idleManager.watch(folder);
+                    String out = (String) folder.doCommand(imapProtocol -> {
+//                    Response[] responses = imapProtocol.command("FETCH " + imap_message.getMessageNumber() + " (FLAGS UID)", null); // TODO
+                        Response[] responses = imapProtocol.command("UID SEARCH UID 9267", null);
+
+                        return responses[0].toString();
+                    });
+
+                    System.out.println(out);
+
+//                    idleManager.watch(folder);
 
 //                    while (true) {
 //                        Thread.sleep(290000);
-                        idleManager.watch(folder);
+//                        idleManager.watch(folder);
 //                    }
                 }
             }
 
-            showThreads();
+//            showThreads();
 
         } catch (Exception e) {
             e.printStackTrace();

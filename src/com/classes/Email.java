@@ -64,7 +64,7 @@ public class Email {
 
             // TODO Gmail and mail название папки исходящие
 
-            this.direction = (folder_name.equals("Исходящие") ? "out" : "in");
+//            this.direction = (folder_name.equals("Исходящие") ? "out" : "in");
 
             String cc = InternetAddress.toString(imap_message.getRecipients(Message.RecipientType.CC));
             this.cc   = cc;
@@ -75,8 +75,10 @@ public class Email {
             String from = InternetAddress.toString(imap_message.getFrom());
             this.from = (from == null || from.equals("") ? "null" : from);
 
+            this.direction = from.contains(email_account) ? "out" : "in"; // TODO проверить
+
             String to = InternetAddress.toString(imap_message.getRecipients(Message.RecipientType.TO));
-            this.to   = (to == null || to.equals("") ? "null" : to);
+            this.to = (to == null || to.equals("") ? "null" : to);
 
             this.user_id = user_id;
 
@@ -109,13 +111,22 @@ public class Email {
             this.folder = folder_name;
             this.update = new Timestamp(new Date().getTime());
 
+
+            if (!imapFolder.isOpen()) {
+                try {
+                    imapFolder.open(IMAPFolder.READ_ONLY);
+                } catch (MessagingException e) {
+                    e.printStackTrace();
+                }
+            }
+
             long uid = imapFolder.getUID(imap_message);
 
-            IMAPFolder imap_folder = (IMAPFolder) imap_message.getFolder();
+//            IMAPFolder imap_folder = (IMAPFolder) imap_message.getFolder();
 
-            if (!imap_folder.isOpen()) {
+            if (!imapFolder.isOpen()) {
                 try {
-                    imap_folder.open(IMAPFolder.READ_ONLY);
+                    imapFolder.open(IMAPFolder.READ_ONLY);
                 } catch (MessagingException e) {
                     e.printStackTrace();
                 }
@@ -124,10 +135,11 @@ public class Email {
             if (uid > 0) {
                 this.uid = uid;
             } else {
-                this.uid = imap_folder.getUID(imap_message);
+//                this.uid = imap_folder.getUID(imap_message);
+                this.uid = imapFolder.getUID(imap_message);
             }
 
-            String out = (String) imap_folder.doCommand(imapProtocol -> {
+            String out = (String) imapFolder.doCommand(imapProtocol -> {
 //                    Response[] responses = imapProtocol.command("FETCH " + imap_message.getMessageNumber() + " (FLAGS UID)", null); // TODO
                 Response[] responses = imapProtocol.command("FETCH " + imap_message.getMessageNumber() + " (FLAGS)", null);
 
@@ -148,9 +160,6 @@ public class Email {
             if (out.contains("$label4"))       { this.label4  = 1; }
             if (out.contains("$label5"))       { this.label5  = 1; }
             if (out.contains("$HasAttachment")) { this.has_attachment = 1; }
-
-
-
 
 //            Date sent = message.getSentDate();         // когда отправлено
 //            Date received = message.getReceivedDate(); // когда получено

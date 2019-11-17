@@ -1,6 +1,7 @@
 package com.classes;
 
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IdleManager;
 
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -32,6 +33,15 @@ public class MyFolder implements Cloneable {
 
     private Session session;
     private ExecutorService es;
+    private IdleManager idleManager;
+
+    public IdleManager getIdleManager() {
+        return idleManager;
+    }
+
+    public void setIdleManager(IdleManager idleManager) {
+        this.idleManager = idleManager;
+    }
 
     public Thread getThread() {
         return thread;
