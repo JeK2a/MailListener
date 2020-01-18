@@ -8,13 +8,16 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Date;
 
 public class Email {
 
+    private static String[] folders_arr = new String[]{"Отправленные", "Sent", "Черновик", "Черновики", "Draft", "Drafts"};
+
     private int    id = 0;
     private String email_account;
-    private String direction;
+    private String direction = "error";
     private int    user_id;
     private int    client_id = 0;
     private long   uid;
@@ -75,7 +78,11 @@ public class Email {
             String from = InternetAddress.toString(imap_message.getFrom());
             this.from = (from == null || from.equals("") ? "null" : from);
 
-            this.direction = from.contains(email_account) ? "out" : "in"; // TODO проверить
+            assert from != null;
+//            this.direction = from.contains(email_account) ? "out" : "in"; // TODO проверить
+
+//            if(Arrays.stream(new String[]{"Отправленые", "Sent"}).anyMatch(s -> s.equals(folder_name))) {
+            this.direction = Arrays.asList(folders_arr).contains(folder_name) ? "out" : "in";
 
             String to = InternetAddress.toString(imap_message.getRecipients(Message.RecipientType.TO));
             this.to = (to == null || to.equals("") ? "null" : to);

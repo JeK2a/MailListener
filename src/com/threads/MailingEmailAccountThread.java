@@ -46,23 +46,14 @@ public class MailingEmailAccountThread implements Runnable {
         Session session = Session.getDefaultInstance(myProperties, null); // Создание сессии
         session.setDebug(SettingsMail.getSession_debug());          // Включение дебага
 
-
-
         try {
             ExecutorService es = myProperties.getEs();
-
-
-
-
-            Store store = session.getStore("imap");
-
-            String status_tmp = connectToStore(store);
+            Store store        = session.getStore("imap");
+            String status_tmp  = connectToStore(store);
 
             emailAccount.setStatus(status_tmp);
 
-            if (!status_tmp.equals("connect")) {
-                return;
-            }
+            if (!status_tmp.equals("connect")) { return; }
 
             addStoreListeners(store);
 
@@ -244,16 +235,6 @@ public class MailingEmailAccountThread implements Runnable {
             return status;
         }
     }
-
-//    public void addFolder(IMAPFolder imap_folder) { // TODO test
-//        MyFolder myFolder = new MyFolder(imap_folder);
-//        emailAccount.addMyFolder(myFolder);
-//        Thread myTreadAllMails = new Thread(new AddNewMessageThread(emailAccount, myFolder, imap_folder)); // Создание потока для синхронизации всего почтового ящика
-//        myFolder.setThread(myTreadAllMails);
-//        myTreadAllMails.setName("AddNewMessageThread " + AddNewMessageThread.getIndex());
-//        myTreadAllMails.setDaemon(true);
-//        myTreadAllMails.start();
-//    }
 
     public void addFolder(IMAPFolder imap_folder, Session session, ExecutorService es) {
         MyFolder myFolder = new MyFolder(imap_folder, session, es);

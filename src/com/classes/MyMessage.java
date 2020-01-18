@@ -468,7 +468,11 @@ public class MyMessage {
                     System.out.println(this.message_id);
                     System.out.println(mail_MID + ")");
 
-                    if (this.message_id.length() == mail_MID.length()) {
+                    if (
+                            this.message_id != null &&
+                            mail_MID != null        &&
+                            this.message_id.length() == mail_MID.length()
+                    ) {
                         char[] c1 = this.message_id.toCharArray();
                         char[] c2 = mail_MID.toCharArray();
 

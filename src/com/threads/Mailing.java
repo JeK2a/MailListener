@@ -7,8 +7,6 @@ import com.classes.User;
 import com.db.DB;
 import com.sun.mail.imap.IMAPFolder;
 
-import javax.mail.Folder;
-import javax.mail.MessagingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;

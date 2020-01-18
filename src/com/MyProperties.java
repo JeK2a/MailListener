@@ -1,7 +1,6 @@
 package com;
 
 import com.classes.User;
-import com.service.SettingsMail;
 
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;

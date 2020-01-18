@@ -244,9 +244,6 @@ public class AddNewMessageThread implements Runnable {
 
 //            reopenFolder("fetch");
 
-
-//            System.out.println("fetch count = " + messages.length);
-
             FetchProfile fp = new FetchProfile();
 
             if (!only_uid) {
@@ -259,8 +256,6 @@ public class AddNewMessageThread implements Runnable {
             }
 
             fp.add(UIDFolder.FetchProfileItem.UID);
-
-//            Folder tmp_folder = messages[0].getFolder();
 
             final int count_all      = messages.length;
             final int count_messages = 100;
@@ -282,37 +277,26 @@ public class AddNewMessageThread implements Runnable {
 
                 Message[] messages_tmp = Arrays.copyOfRange(messages, start, end);
 
-    //            myFolder.setStatus("Fetch start " + messages.length + " / " + tmp_folder.getMessageCount());
                 myFolder.setStatus("Fetch start " + messages_tmp.length + " / " + count_all + " / " + imap_folder.getMessageCount() + " (" + start + " - " + end + ")");
 
                 System.out.println(messages_tmp.length);
 
                 imap_folder.fetch(messages_tmp, fp);
 
-    //            System.out.println("fetch");
-
-    //            myFolder.setStatus("load in DB start " + messages.length + " / " + tmp_folder.getMessageCount());
                 myFolder.setStatus("load in DB start " + messages_tmp.length + " / " + count_all + " / " + imap_folder.getMessageCount() + " (" + start + " - " + end + ")");
 
                 if (!only_uid) {
                     for (Message message : messages_tmp) {
-                        long start_timer = System.currentTimeMillis();
-
                         try {
 
                             db.addEmail(new Email(user_id, email_address, message, folder_name, imap_folder));
                         } catch (Exception e) {
                             myFolder.setException(e);
                         }
-
-                        long stop_timer = System.currentTimeMillis();
-
-//                        System.out.println("addEmail " + (stop_timer - start_timer));
                     }
                 }
 
                 myFolder.setStatus("load in DB end");
-
             }
 
         } catch (Exception e) {
@@ -511,8 +495,6 @@ public class AddNewMessageThread implements Runnable {
                     StringBuilder str_uids = new StringBuilder();
                     Response[] responses   = imapProtocol.command("UID SEARCH " + flag.getKey(), null);
                     String[] arr_out_str   = responses[0].toString().split(" ");
-
-//                    System.out.println(responses[0]);
 
                     if (arr_out_str.length > 2 && !(Integer.parseInt(arr_out_str[2]) > 0)) {
                         System.err.println(Arrays.toString(responses));

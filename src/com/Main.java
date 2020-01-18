@@ -72,33 +72,7 @@ public class Main {
 
 
     // List all threads and recursively list all subgroup
-//    public static void listThreads(ThreadGroup group, String indent) {
-//        System.out.println(indent + "Group[" + group.getName() + " : " + group.getClass()+"]");
-//
-//        int nt = group.activeCount();
-//        Thread[] threads = new Thread[nt * 2 + 10]; //nt is not accurate
-//        nt = group.enumerate(threads, false);
-//
-//        // List every thread in the group
-//        for (int i = 0; i < nt; i++) {
-//            Thread t = threads[i];
-//            System.out.println(indent + "  Thread[" + t.getName() + " : " +
-//                    (t.getContextClassLoader() == null ? "null" : t.getContextClassLoader().getName())
-//                            + " : " + t.getClass().getName() + "]");
-//        }
-//
-//        // Recursively list all subgroups
-//        int ng = group.activeGroupCount();
-//        ThreadGroup[] groups = new ThreadGroup[ng * 2 + 10];
-//        ng = group.enumerate(groups, false);
-//
-//        for (int i = 0; i < ng; i++) {
-//            listThreads(groups[i], indent + "  ");
-//        }
-//    }
-
     public static void countThreads(ThreadGroup group, String indent) { // TODO раскоментировать
-//        System.out.println(indent + "Group[" + group.getName() + " : " + group.getClass()+"]");
 
         int nt = group.activeCount();
         Thread[] threads = new Thread[nt * 2 + 10];
@@ -147,5 +121,16 @@ public class Main {
         }
     }
 
+    public static void sleep(int millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void sleep() {
+        sleep(500);
+    }
 
 }
