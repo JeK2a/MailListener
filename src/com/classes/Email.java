@@ -69,7 +69,7 @@ public class Email {
 
 //            this.direction = (folder_name.equals("Исходящие") ? "out" : "in");
 
-            String cc = InternetAddress.toString(imap_message.getRecipients(Message.RecipientType.CC));
+            String cc = InternetAddress.toString(imap_message.getRecipients(Message.RecipientType.CC)); // TODO ERROR
             this.cc   = cc;
 
             String bcc = InternetAddress.toString(imap_message.getRecipients(Message.RecipientType.BCC));

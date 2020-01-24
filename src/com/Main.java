@@ -33,7 +33,13 @@ public class Main {
                     System.err.println("Suicide died");
                 }
 
-                if (db_i++ < 5 && (DB.result || db.connectToDB())) {
+                if (
+                        db_i++ < 5 &&
+                        (
+                            DB.result ||
+                            db.connectToDB()
+                        )
+                ) {
                     db_i = 0;
                 }
 

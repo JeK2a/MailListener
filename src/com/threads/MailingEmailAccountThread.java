@@ -7,14 +7,12 @@ import com.classes.EmailAccount;
 import com.classes.MyFolder;
 import com.db.DB;
 import com.service.SettingsMail;
+import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IdleManager;
 
-import javax.mail.AuthenticationFailedException;
-import javax.mail.Folder;
-import javax.mail.Session;
-import javax.mail.Store;
+import javax.mail.*;
 import javax.mail.event.ConnectionEvent;
 import javax.mail.event.ConnectionListener;
 import javax.mail.event.FolderEvent;
@@ -128,7 +126,7 @@ public class MailingEmailAccountThread implements Runnable {
 
             @Override
             public void closed(ConnectionEvent connectionEvent) {
-                emailAccount.setStatus("closed");
+//                emailAccount.setStatus("closed");
                 connectToStore(store);
             }
         });
@@ -207,9 +205,9 @@ public class MailingEmailAccountThread implements Runnable {
                 emailAccount.incrementCount_restart_noop();
             } else {
                 store.connect(
-                    emailAccount.getUser().getHost(),
-                    emailAccount.getUser().getEmail(),
-                    emailAccount.getUser().getPassword()
+                        emailAccount.getUser().getHost(),
+                        emailAccount.getUser().getEmail(),
+                        emailAccount.getUser().getPassword()
                 );
                 emailAccount.incrementCount_restart_success();
             }
@@ -221,7 +219,8 @@ public class MailingEmailAccountThread implements Runnable {
 
             db.updateSuccess(emailAccount.getUser().getEmail(), 1);
             status = "connect";
-        } catch (AuthenticationFailedException e) {
+//        } catch (AuthenticationFailedException | MessagingException  e ) {
+        } catch (MessagingException e) {
             emailAccount.setException(e);
             emailAccount.incrementCount_restart_fail();
         } catch (Exception e) {

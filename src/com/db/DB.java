@@ -625,11 +625,11 @@ public class DB implements AutoCloseable {
             "SELECT `uid` " +
             "FROM `a_api_emails` " +
             "WHERE  " +
-            "   `folder` = '" + folder_name  + "' AND " +
-            "   `removed` = 0 AND " +
+            "   `folder`        = '" + folder_name   + "' AND " +
             "   `email_account` = '" + email_address + "' AND " +
-            "   `uid` >= " + uid_start + " AND " +
-            "   `uid` <= " + uid_end   + " ";
+            "   `uid`          >= "  + uid_start     + "  AND " +
+            "   `uid`          <= "  + uid_end       + "  AND " +
+            "   `removed`       = 0 ";
 
         if (uids != null && uids.size() > 0) {
             StringBuilder str_uids = new StringBuilder(String.valueOf(uids.get(0)));

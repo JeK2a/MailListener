@@ -448,7 +448,7 @@ public class MyMessage {
             }
 
             long   mail_UID         = imap_folder.getUID(imap_message);
-            String mail_MID         = imap_message.getMessageID();
+//            String mail_MID         = imap_message.getMessageID();
 //            String mail_from        = InternetAddress.toString(imap_message.getFrom());
 //            String mail_to          = InternetAddress.toString(imap_message.getRecipients(Message.RecipientType.TO));
 //            String mail_reply_to    = InternetAddress.toString(imap_message.getReplyTo());
@@ -462,27 +462,27 @@ public class MyMessage {
                     System.out.println("UID( " + this.getUid() + " !=" + mail_UID + " )");
                 }
 
-                if (!compareString(this.message_id, mail_MID, false)) {
-                    compareString(this.message_id, mail_MID,true);
-                    System.out.println("Message_id( != )");
-                    System.out.println(this.message_id);
-                    System.out.println(mail_MID + ")");
-
-                    if (
-                            this.message_id != null &&
-                            mail_MID != null        &&
-                            this.message_id.length() == mail_MID.length()
-                    ) {
-                        char[] c1 = this.message_id.toCharArray();
-                        char[] c2 = mail_MID.toCharArray();
-
-                        for (int i=0; i < this.message_id.length(); i++) {
-                            if (String.valueOf(c1[i]).equals(String.valueOf(c2[i]))) {
-                                System.out.println(String.valueOf(c1[i]) + "===" + String.valueOf(c2[i]));
-                            }
-                        }
-                    }
-                }
+//                if (!compareString(this.message_id, mail_MID, false)) {
+//                    compareString(this.message_id, mail_MID,true);
+//                    System.out.println("Message_id( != )");
+//                    System.out.println(this.message_id);
+//                    System.out.println(mail_MID + ")");
+//
+//                    if (
+//                            this.message_id != null &&
+//                            mail_MID != null        &&
+//                            this.message_id.length() == mail_MID.length()
+//                    ) {
+//                        char[] c1 = this.message_id.toCharArray();
+//                        char[] c2 = mail_MID.toCharArray();
+//
+//                        for (int i=0; i < this.message_id.length(); i++) {
+//                            if (String.valueOf(c1[i]).equals(String.valueOf(c2[i]))) {
+//                                System.out.println(String.valueOf(c1[i]) + "===" + String.valueOf(c2[i]));
+//                            }
+//                        }
+//                    }
+//                }
 
 //                if (!compareString(this.from, mail_from, false)) {
 //                    compareString(this.from, mail_from, true);
@@ -518,15 +518,13 @@ public class MyMessage {
 
                 if (!compareString(this.folder, mail_folder_name, false)) {
                     compareString(this.folder, mail_folder_name, true);
-                    System.out.println("Folder name( != )");
-                    System.out.println(this.folder);
-                    System.out.println(mail_folder_name);
+                    System.out.println("Folder name(" + this.folder + "!=" + mail_folder_name + ") " + email_acount);
                 }
             }
 
             if (
                 compareLong(this.getUid(),      mail_UID)      &&
-                compareString(this.message_id,  mail_MID, false)      &&
+//                compareString(this.message_id,  mail_MID, false)      &&
 //                compareString(this.from,        mail_from, false)     &&
 //                compareString(this.to,          mail_to, false)       &&
 //                compareString(this.in_reply_to, mail_reply_to, false) &&
@@ -540,6 +538,7 @@ public class MyMessage {
                 System.out.println("UID( " + this.getUid() + " !=" + mail_UID + " )");
             }
         } catch (Exception e) {
+            System.out.println(imap_folder.getFullName() + " ----- " + email_acount);
             e.printStackTrace();
         }
 

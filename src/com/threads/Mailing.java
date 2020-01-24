@@ -1,12 +1,21 @@
 package com.threads;
 
 import com.Main;
+import com.classes.Email;
 import com.classes.EmailAccount;
 import com.classes.MyFolder;
 import com.classes.User;
 import com.db.DB;
 import com.sun.mail.imap.IMAPFolder;
 
+import javax.mail.Folder;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Store;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
@@ -47,7 +56,7 @@ public class Mailing implements Runnable {
 //                        break;
 //                    }
 
-                Thread.sleep(15000);
+                Thread.sleep(5000); // TODO 15000
 //                checkAccounts();
 //                }
             }
@@ -95,12 +104,36 @@ public class Mailing implements Runnable {
 
                 MyFolder myFolder_tmp = folderEntry.getValue();
 
+                String status = myFolder_tmp.getStatus();
+
+                if (status.equals("sleep")) {
+                    try {
+                        IMAPFolder imap_folder_tmp = reopenFolder(myFolder_tmp);
+                        int messages_count = imap_folder_tmp.getMessageCount();
+
+                        if (messages_count > 0) {
+                            Message message_tmp = imap_folder_tmp.getMessage(messages_count);
+
+                            LocalDate now = LocalDate.now();
+                            LocalDate message_date = message_tmp.getReceivedDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+                            Period period = Period.between(message_date, now);
+
+                            System.err.println("== " + period.getDays() + " ==");
+                        }
+
+                        continue;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 if (
 //                        true
 //                        myFolder_tmp.getThread_problem() > 0 &&
-                        myFolder_tmp.getStatus().equals("error")    ||
-                        myFolder_tmp.getStatus().equals("close")    ||
-                        myFolder_tmp.getStatus().equals("closed")   ||
+                        status.equals("error")    ||
+                        status.equals("close")    ||
+                        status.equals("closed")   ||
                         myFolder_tmp.getCount_restart_success() > 1 ||
                         (
                             myFolder_tmp.getThread_problem() > 0 &&
@@ -143,6 +176,52 @@ public class Mailing implements Runnable {
         emailAccounts.put(emailAccount.getEmailAddress(), emailAccount);
         startMailThread.setDaemon(true);
         startMailThread.start(); // Запус потока
+    }
+
+    public IMAPFolder reopenFolder(MyFolder myFolder) {
+        IMAPFolder imap_folder;
+
+        try {
+            myFolder.setThread_problem(1);
+            long start = System.currentTimeMillis();
+            imap_folder = myFolder.getImap_folder();
+
+            if (imap_folder.isOpen()) {
+                myFolder.incrementCount_restart_noop();
+            } else {
+                Store tmp_store = imap_folder.getStore();
+                if (!tmp_store.isConnected()) {
+                    Thread.sleep(1000);
+                    if (!tmp_store.isConnected()) {
+                        tmp_store.connect();
+                    }
+                }
+
+                if (!imap_folder.isOpen()) {
+                    Thread.sleep(1000);
+                    if (!imap_folder.isOpen()) {
+                        imap_folder.open(IMAPFolder.READ_ONLY); // TODO javax.mail.MessagingException: * BYE JavaMail Exception: java.net.SocketException: Connection or outbound has closed; || This operation is not allowed on an open folder
+                    }
+                }
+//                fetchMessages(imap_folder.getMessages(), true); // TODO доработать (при перепоплючении проверять сообщения)
+//                FetchProfile fp = new FetchProfile();
+//                Message[] messages = new Message[0];
+//                imap_folder.fetch(messages, fp);
+                myFolder.incrementCount_restart_success();
+            }
+
+            long stop = System.currentTimeMillis();
+
+            myFolder.setTime_reconnect(stop - start);
+        } catch (Exception e) {
+            myFolder.setException(e);
+            myFolder.incrementCount_restart_fail();
+            return null;
+        } finally {
+            myFolder.setThread_problem(0);
+        }
+
+        return imap_folder;
     }
 
 }
