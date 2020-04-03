@@ -9,6 +9,8 @@ import com.service.SettingsMail;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 // TODO добавить во всех запросах:
 // TODO result stmt -> close if != null && isOpen
@@ -23,15 +25,15 @@ public class DB implements AutoCloseable {
 //
 //    };
 
-    private static final String[] params = {
+    private static final String[] params_arr = {
         "useSSL=false",
         "useUnicode=true",
         "characterEncoding=utf-8"
     };
     private static Connection con;
-    private static int count_errors = 0;
-    public static boolean result = false;
-    public static int count_queries = 0;
+    private static int count_errors  = 0;
+    public  static int count_queries = 0;
+    public  static boolean result    = false;
 
     private String USER;
     private String PASSWORD;
@@ -68,9 +70,12 @@ public class DB implements AutoCloseable {
 
             Class.forName("com.mysql.jdbc.Driver"); // MySQL 5
 //            Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL 8
-            System.out.println(URL + "?" + arrayToString(params, "&") + USER + PASSWORD);
 
-            con = DriverManager.getConnection(URL + "?" + arrayToString(params, "&"), USER, PASSWORD); // JDBC подключение к MySQL
+            String params = arrayToString(params_arr, "&");
+
+            System.out.println(URL + "?" + params + USER + PASSWORD);
+
+            con = DriverManager.getConnection(URL + "?" + params, USER, PASSWORD); // JDBC подключение к MySQL
 
             if (con  == null || con.isClosed()) {           // Если подключение к БД не установлено
                 System.err.println("Нет соединения с БД!"); // Вывести ошибку
@@ -78,7 +83,7 @@ public class DB implements AutoCloseable {
                 result = true;
             }
         } catch(Exception e) {
-            System.err.println("Не ужалось подключиться к DB");
+            System.err.println("Не удалось подключиться к DB");
             e.printStackTrace();
 
             Main.sleep(30000);
@@ -95,7 +100,10 @@ public class DB implements AutoCloseable {
 
     public boolean addEmail(Email email) {
 
-        if (email == null || email.getFolder() == null) { // TODO проверить, в каких ситуациях может возникать и как влияет return
+        if (
+            email             == null ||
+            email.getFolder() == null
+        ) { // TODO проверить, в каких ситуациях может возникать и как влияет return
             new NullPointerException();
             return false;
         }
@@ -104,42 +112,48 @@ public class DB implements AutoCloseable {
             "INSERT INTO `a_api_emails`( " +
             "    `direction`, "      + // 1
             "    `user_id`, "        + // 2
-            "    `client_id`, "      + // 3
-            "    `uid`, "            + // 4
-            "    `message_id`, "     + // 5
-            "    `from`, "           + // 6
-            "    `to`, "             + // 7
-            "    `in_reply_to`, "    + // 8
-            "    `references`, "     + // 9
-            "    `message_date`, "   + //10
-            "    `size`, "           + //11
-            "    `subject`, "        + //12
-            "    `folder`, "         + //13
-            "    `flagged`, "        + //14
-            "    `answered`, "       + //15
-            "    `deleted`, "        + //16
-            "    `removed`, "        + //17
-            "    `seen`, "           + //18
-            "    `draft`, "          + //19
-            "    `forwarded`, "      + //20
-            "    `label_1`, "        + //21
-            "    `label_2`, "        + //22
-            "    `label_3`, "        + //23
-            "    `label_4`, "        + //24
-            "    `label_5`, "        + //25
-            "    `has_attachment`, " + //26
-            "    `time`, "           + //27
-            "    `email_account`, "  + //28
-            "    `tdf_id` "          + //29
+            "    `uid`, "            + // 3
+            "    `message_id`, "     + // 4
+            "    `from`, "           + // 5
+            "    `from_decode`, "           + // 5
+            "    `to`, "             + // 6
+            "    `to_decode`, "             + // 6
+            "    `cc`, "             + // 7
+            "    `bcc`, "            + // 8
+            "    `in_reply_to`, "    + // 9
+            "    `references`, "     + //10
+            "    `message_date`, "   + //11
+            "    `size`, "           + //12
+            "    `subject`, "        + //13
+            "    `folder`, "         + //14
+            "    `flagged`, "        + //15
+            "    `answered`, "       + //16
+            "    `deleted`, "        + //17
+            "    `removed`, "        + //18
+            "    `seen`, "           + //19
+            "    `draft`, "          + //20
+            "    `forwarded`, "      + //21
+            "    `label_1`, "        + //22
+            "    `label_2`, "        + //23
+            "    `label_3`, "        + //24
+            "    `label_4`, "        + //25
+            "    `label_5`, "        + //26
+            "    `has_attachment`, " + //27
+            "    `time`, "           + //28
+            "    `email_account`, "  + //29
+            "    `tdf_id` "          + //30
             ") "                     +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) " +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) " +
             "    ON DUPLICATE KEY UPDATE " +
             "        `direction`      = VALUES(`direction`), "      +
             "        `user_id`        = VALUES(`user_id`), "        +
-            "        `client_id`      = VALUES(`client_id`), "      +
             "        `message_id`     = VALUES(`message_id`), "     +
             "        `from`           = VALUES(`from`), "           +
+            "        `from_decode`    = VALUES(`from_decode`), "           +
             "        `to`             = VALUES(`to`), "             +
+            "        `to_decode`      = VALUES(`to_decode`), "             +
+            "        `cc`             = VALUES(`cc`), "             +
+            "        `bcc`            = VALUES(`bcc`), "            +
             "        `in_reply_to`    = VALUES(`in_reply_to`), "    +
             "        `references`     = VALUES(`references`), "     +
             "        `message_date`   = VALUES(`message_date`), "   +
@@ -159,7 +173,10 @@ public class DB implements AutoCloseable {
             "        `label_5`        = VALUES(`label_5`), "        +
             "        `has_attachment` = VALUES(`has_attachment`), " +
             "        `time`           = VALUES(`time`), "           +
-            "        `tdf_id`         = VALUES(`tdf_id`);";
+            "        `tdf_id`         = VALUES(`tdf_id`),"          +
+            "        `new`            = 0, "                        +
+            "        `time_updated`   = NOW() "                     +
+            ";";
 
         try {
             incCount_queries();
@@ -167,33 +184,36 @@ public class DB implements AutoCloseable {
 
             prepare_statement_tmp.setString(1, email.getDirection());
             prepare_statement_tmp.setInt(2, email.getUser_id());
-            prepare_statement_tmp.setInt(3, email.getClient_id());
-            prepare_statement_tmp.setLong(4, email.getUid());
-            prepare_statement_tmp.setString(5, email.getMessage_id());
-            prepare_statement_tmp.setString(6, email.getFrom());
+            prepare_statement_tmp.setLong(3, email.getUid());
+            prepare_statement_tmp.setString(4, email.getMessage_id());
+            prepare_statement_tmp.setString(5, email.getFrom());
+            prepare_statement_tmp.setString(6, email.getFrom_decode());
             prepare_statement_tmp.setString(7, email.getTo());
-            prepare_statement_tmp.setString(8, email.getIn_replay_to());
-            prepare_statement_tmp.setString(9, email.getReferences());
-            prepare_statement_tmp.setTimestamp(10, email.getDate());
-            prepare_statement_tmp.setLong(11, email.getSize());
-            prepare_statement_tmp.setString(12, email.getSubject());
-            prepare_statement_tmp.setString(13, email.getFolder());
-            prepare_statement_tmp.setInt(14, email.getFlagged());
-            prepare_statement_tmp.setInt(15, email.getAnswred());
-            prepare_statement_tmp.setInt(16, email.getDeleted());
-            prepare_statement_tmp.setInt(17, 0); // TODO !!!!!
-            prepare_statement_tmp.setInt(18, email.getSeen());
-            prepare_statement_tmp.setInt(19, email.getDraft());
-            prepare_statement_tmp.setInt(20, email.getForwarded());
-            prepare_statement_tmp.setInt(21, email.getLabel1());
-            prepare_statement_tmp.setInt(22, email.getLabel2());
-            prepare_statement_tmp.setInt(23, email.getLabel3());
-            prepare_statement_tmp.setInt(24, email.getLabel4());
-            prepare_statement_tmp.setInt(25, email.getLabel5());
-            prepare_statement_tmp.setInt(26, email.getHas_attachment());
-            prepare_statement_tmp.setTimestamp(27, email.getUpdate());
-            prepare_statement_tmp.setString(28, email.getEmail_account());
-            prepare_statement_tmp.setString(29, email.getTdf_id());
+            prepare_statement_tmp.setString(8, email.getTo_decode());
+            prepare_statement_tmp.setString(9, email.getCc());
+            prepare_statement_tmp.setString(10, email.getBcc());
+            prepare_statement_tmp.setString(11, email.getIn_replay_to());
+            prepare_statement_tmp.setString(12, email.getReferences());
+            prepare_statement_tmp.setTimestamp(13, email.getDate());
+            prepare_statement_tmp.setLong(14, email.getSize());
+            prepare_statement_tmp.setString(15, email.getSubject());
+            prepare_statement_tmp.setString(16, email.getFolder());
+            prepare_statement_tmp.setInt(17, email.getFlagged());
+            prepare_statement_tmp.setInt(18, email.getAnswred());
+            prepare_statement_tmp.setInt(19, email.getDeleted());
+            prepare_statement_tmp.setInt(20, 0); // TODO !!!!!
+            prepare_statement_tmp.setInt(21, email.getSeen());
+            prepare_statement_tmp.setInt(22, email.getDraft());
+            prepare_statement_tmp.setInt(23, email.getForwarded());
+            prepare_statement_tmp.setInt(24, email.getLabel1());
+            prepare_statement_tmp.setInt(25, email.getLabel2());
+            prepare_statement_tmp.setInt(26, email.getLabel3());
+            prepare_statement_tmp.setInt(27, email.getLabel4());
+            prepare_statement_tmp.setInt(28, email.getLabel5());
+            prepare_statement_tmp.setInt(29, email.getHas_attachment());
+            prepare_statement_tmp.setTimestamp(30, email.getUpdate());
+            prepare_statement_tmp.setString(31, email.getEmail_account());
+            prepare_statement_tmp.setString(32, email.getTdf_id());
 
             prepare_statement_tmp.executeUpdate();
 
@@ -214,7 +234,12 @@ public class DB implements AutoCloseable {
             e.printStackTrace();
             System.err.println(query);
         } catch (Exception e) {
-            System.err.println("addEmail error");
+            System.err.println("addEmail error"); // TODO tmp
+            System.err.println("===============================");
+            System.err.println(email.getFrom());
+            System.err.println("===============================");
+            System.err.println(email.getFrom_decode());
+            System.err.println("===============================");
             System.err.println(query);
             e.printStackTrace();
 
@@ -261,8 +286,10 @@ public class DB implements AutoCloseable {
             "       `users`.`email_provider` = `settings`.`provider` AND " +
             "       `settings`.`type` = 'imap'  " +
             "WHERE " +
-//                "   `id` = 55 AND " +
-//            "   `users`.`email` = \"angelina@tdfort.ru\" " +
+//            "   `users`.`id` = 304 " +
+//                "   `id` = 538 " +
+//            "   `users`.`email` = \"zakupkiship@tdfort.ru\" " +
+//            "   `users`.`email` = \"me@tdfort.ru\" " +
             "   `users`.`is_monitoring` = 1 " +
             "ORDER  BY `users`.`email`;"
 //                +
@@ -325,7 +352,7 @@ public class DB implements AutoCloseable {
             "FROM `a_api_emails` " +
             "WHERE " +
             "    `email_account` = \"" + email_account + "\" AND " +
-            "    `folder`        = \"" + folder_name   + "\" AND " +
+            "    `folder`        = \"" + folder_name.replace("\"", "\\\"")   + "\" AND " +
             "    `removed`       = 0;" ;
 
         long count_messages = 0;
@@ -420,31 +447,34 @@ public class DB implements AutoCloseable {
             incCount_queries();
 
             stmt = con.createStatement();
-            stmt.executeUpdate(query);
+            stmt.executeUpdate(query); // TODO
             stmt.close();
         } catch (
-            com.mysql.jdbc.exceptions.jdbc4.CommunicationsException |
-            com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException e
+//            com.mysql.jdbc.exceptions.jdbc4.CommunicationsException |
+//            com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException |
+            com.mysql.jdbc.exceptions.jdbc4.MySQLTransactionRollbackException e
         ) {
-            e.printStackTrace();
-            if (++count_errors > 10) {
-                return false;
-            } else {
-                Main.sleep();
-                if (connectToDB()) {
-                    return updateQuery(query);
-                }
-            }
-        } catch (com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException e) {
-            e.printStackTrace();
-            System.err.println(query);
-        } catch (SQLException e) {
-            if (connectToDB()) {
-                updateQuery(query);
-            }
-            e.printStackTrace();
+//            e.printStackTrace();
+//            if (++count_errors > 10) {
+//                return false;
+//            } else {
+//                Main.sleep();
+//                if (connectToDB()) {
+//                    return updateQuery(query);
+//                }
+//            }
+//        } catch (com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException e) {
+//            e.printStackTrace();
+//            System.err.println(query);
+//        } catch (SQLException e) {
+//            if (connectToDB()) {
+//                updateQuery(query);
+//            }
+//            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
+
+            System.out.println(query);
         } finally {
             try {
                 if (stmt != null && !stmt.isClosed()) {
@@ -771,7 +801,6 @@ public class DB implements AutoCloseable {
             "SELECT " +
             "    `direction`, "      + //1
             "    `user_id`, "        + //2
-            "    `client_id`, "      + //3
             "    `uid`, "            + //4
             "    `message_id`, "     + //5
             "    `from`, "           + //6
@@ -810,7 +839,6 @@ public class DB implements AutoCloseable {
                 return new MyMessage(
                     rs_tmp.getString("direction"),
                     rs_tmp.getInt("user_id"),
-                    rs_tmp.getInt("client_id"),
                     rs_tmp.getLong("uid"),
                     rs_tmp.getString("message_id"),
                     rs_tmp.getString("from"),
@@ -864,4 +892,53 @@ public class DB implements AutoCloseable {
         return null;
     }
 
+//    public ConcurrentHashMap<Integer, String> getDecode(String dir) {
+//        String query =
+//            "SELECT " +
+//            "   `emails`.`id`, " +
+//            "   `emails`.`" + dir + "` " +
+//            "FROM `a_api_emails` AS `emails` " +
+//            "WHERE " +
+//            "   `emails`.`" + dir + "` LIKE '?=%' escape \'?\' AND " +
+//            "   `emails`.`" + dir + "_decode` IS NULL " +
+//            "ORDER BY `id` " +
+//            "LIMIT 5000 OFFSET 0 " +
+//            ";";
+//
+//        ConcurrentHashMap<Integer, String> emails_cut = new ConcurrentHashMap<>();
+//
+//        try {
+//            Statement stmt = con.createStatement();
+//            incCount_queries();
+//            ResultSet rs_tmp = stmt.executeQuery(query);
+//
+//            while (rs_tmp.next()) {
+//                emails_cut.put(
+//                    rs_tmp.getInt(1),
+//                    rs_tmp.getString(2)
+//
+//                );
+//            }
+//        } catch (
+//                com.mysql.jdbc.exceptions.jdbc4.CommunicationsException |
+//                com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException e
+//        ) {
+//            e.printStackTrace();
+//            if (++count_errors > 10) {
+//                return null;
+//            } else {
+//                Main.sleep();
+//                if (connectToDB()) {
+//                    return getDecode(dir);
+//                }
+//            }
+//        } catch (com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException e) {
+//            e.printStackTrace();
+//            System.err.println(query);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        return emails_cut;
+//    }
 }

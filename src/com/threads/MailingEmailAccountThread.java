@@ -205,9 +205,9 @@ public class MailingEmailAccountThread implements Runnable {
                 emailAccount.incrementCount_restart_noop();
             } else {
                 store.connect(
-                        emailAccount.getUser().getHost(),
-                        emailAccount.getUser().getEmail(),
-                        emailAccount.getUser().getPassword()
+                    emailAccount.getUser().getHost(),
+                    emailAccount.getUser().getEmail(),
+                    emailAccount.getUser().getPassword()
                 );
                 emailAccount.incrementCount_restart_success();
             }
@@ -220,6 +220,8 @@ public class MailingEmailAccountThread implements Runnable {
             db.updateSuccess(emailAccount.getUser().getEmail(), 1);
             status = "connect";
 //        } catch (AuthenticationFailedException | MessagingException  e ) {
+//        } catch (AuthenticationFailedException e) {
+//            status = "error"; // TODO не попадает сюда
         } catch (MessagingException e) {
             emailAccount.setException(e);
             emailAccount.incrementCount_restart_fail();
@@ -238,7 +240,15 @@ public class MailingEmailAccountThread implements Runnable {
     public void addFolder(IMAPFolder imap_folder, Session session, ExecutorService es) {
         MyFolder myFolder = new MyFolder(imap_folder, session, es);
         emailAccount.addMyFolder(myFolder);
-        Thread myTreadAllMails = new Thread(new AddNewMessageThread(emailAccount, myFolder, imap_folder, session, es)); // Создание потока для синхронизации всего почтового ящика
+        Thread myTreadAllMails = new Thread(
+                new AddNewMessageThread(
+                        emailAccount,
+                        myFolder,
+                        imap_folder,
+                        session,
+                        es
+                )
+        ); // Создание потока для синхронизации всего почтового ящика
         myFolder.setThread(myTreadAllMails);
         myTreadAllMails.setName("AddNewMessageThread " + AddNewMessageThread.getIndex());
         myTreadAllMails.setDaemon(true);

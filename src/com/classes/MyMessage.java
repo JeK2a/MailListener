@@ -11,7 +11,6 @@ public class MyMessage {
     private String    email_acount;
     private String    direction;
     private int       user_id;
-    private int       client_id;
     private long      uid;
     private String    message_id;
     private int       msgno;
@@ -44,7 +43,6 @@ public class MyMessage {
     public MyMessage(
             String direction,
             int user_id,
-            int client_id,
             long uid,
             String message_id,
             String from,
@@ -72,7 +70,6 @@ public class MyMessage {
     ) {
         this.direction      = direction;
         this.user_id        = user_id;
-        this.client_id      = client_id;
         this.uid            = uid;
         this.message_id     = message_id;
         this.from           = from;
@@ -132,7 +129,6 @@ public class MyMessage {
         return "MyMessage{"     +
                 "direction='"   + direction   + '\'' +
                 "user_id="      + user_id     +
-                "client_id="    + client_id   +
                 "uid="          + uid         +
                 "message_id='"  + message_id  + '\'' +
                 "msgno="        + msgno       +
@@ -175,14 +171,6 @@ public class MyMessage {
 
     public void setUser_id(int user_id) {
         this.user_id = user_id;
-    }
-
-    public int getClient_id() {
-        return client_id;
-    }
-
-    public void setClient_id(int client_id) {
-        this.client_id = client_id;
     }
 
     public long getUid() {

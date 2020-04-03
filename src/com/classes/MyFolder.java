@@ -277,7 +277,7 @@ public class MyFolder implements Cloneable {
 
     @Override
     public String toString() {
-        return "{\"folder_name\": \""         + folder_name        + "\"," +
+        return "{\"folder_name\": \""         + folder_name.replace("\"", "\\\\\"") + "\"," +
                 "\"status\": \""              + status             + "\"," +
                 "\"exception\": \""           + Base64.getEncoder().encodeToString(exception_text.getBytes()) + "\"," +
                 "\"messages_counter\": \""    + messages_count     + "\"," +

@@ -43,16 +43,18 @@ public class WSSChatClient {
 
                     JSONObject jsonArray = (JSONObject) getArrayFromJSON(message);
 
-                    String command = String.valueOf(jsonArray.get("message"));
+                    String command = String.valueOf(jsonArray.get("subject"));
+//                    String command = String.valueOf(jsonArray.get("message"));
+                    String data = String.valueOf(jsonArray.get("message"));
 
                     switch (command) {
-                        case "restart":
+                        case "restart": // TODO перезапускать все
                             System.out.println("===================================");
                             System.out.println(Main.mailing_tread.isAlive());
                             Main.is_restart = true;
                             System.out.println("===================================");
                             break;
-                        case "stop":
+                        case "exit":
                             System.out.println("========================STOP========================");
                             System.exit(0);
                             break;
@@ -62,15 +64,20 @@ public class WSSChatClient {
                         case "info":
                             // TODO
                             break;
+                        case "restart_account":
+                            String account_name = data;
+                            Mailing.restartAccount(account_name);
+                            break;
+                        case "restart_folder":
+                            String[] strArr = data.split(":");
+                            Mailing.restartFolder(strArr[0], strArr[1]);
+                            break;
                         case "status":
                             System.out.println("start accounts = " + Mailing.emailAccounts.size());
 
                             ConcurrentHashMap<String, EmailAccount> tmpEmailAccounts = new ConcurrentHashMap<>(Mailing.emailAccounts); // (ConcurrentHashMap<Integer, EmailAccount>) Mailing.emailAccounts; // TODO создать дубль
-
                             String json = getJsonFromMap(tmpEmailAccounts);
-
                             json = "{\"accounts\": " + json + ", \"count_queries\": " + DB.count_queries + "}"; // TODO обернуть в SQL
-
                             sendText("json", json);
 
                             System.gc();
@@ -78,6 +85,7 @@ public class WSSChatClient {
                             break;
                         default:
                             System.out.println("Error command - " + command);
+                            break;
                     }
                 } catch (Exception e) {
                     System.err.println("|||" + message + "|||");
@@ -125,10 +133,9 @@ public class WSSChatClient {
 
     public static void sendText(String subject, String text) {
 
-//        if (!subject.equals("json")) return; // TODO выпилить все, кроме json
-
         if (webSocket != null && webSocket.isOpen()) {
             text = forJSON(text);
+
             webSocket.sendText("{\"subject\":\"" + subject + "\", \"message\":\"" + text + "\"}");
         } else {
             System.err.println("error send");

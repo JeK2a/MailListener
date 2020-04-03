@@ -1,5 +1,8 @@
 package com.classes;
 
+import com.Main;
+import com.db.DB;
+import com.service.QuotedPrintable;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -7,9 +10,15 @@ import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Email {
 
@@ -19,12 +28,13 @@ public class Email {
     private String email_account;
     private String direction = "error";
     private int    user_id;
-    private int    client_id = 0;
     private long   uid;
     private String message_id;
     private int    msgno = 0;
     private String from;
+    private String from_decode;
     private String to;
+    private String to_decode;
 
     private String cc;
     private String bcc;
@@ -69,7 +79,7 @@ public class Email {
 
 //            this.direction = (folder_name.equals("Исходящие") ? "out" : "in");
 
-            String cc = InternetAddress.toString(imap_message.getRecipients(Message.RecipientType.CC)); // TODO ERROR
+            String cc = InternetAddress.toString(imap_message.getRecipients(Message.RecipientType.CC)); // TODO ERROR!!!
             this.cc   = cc;
 
             String bcc = InternetAddress.toString(imap_message.getRecipients(Message.RecipientType.BCC));
@@ -77,6 +87,7 @@ public class Email {
 
             String from = InternetAddress.toString(imap_message.getFrom());
             this.from = (from == null || from.equals("") ? "null" : from);
+            this.from_decode = getDecode("from", this.from);
 
             assert from != null;
 //            this.direction = from.contains(email_account) ? "out" : "in"; // TODO проверить
@@ -86,6 +97,7 @@ public class Email {
 
             String to = InternetAddress.toString(imap_message.getRecipients(Message.RecipientType.TO));
             this.to = (to == null || to.equals("") ? "null" : to);
+            this.to_decode = getDecode("to", this.to);
 
             this.user_id = user_id;
 
@@ -95,6 +107,8 @@ public class Email {
             } catch (NullPointerException e) {
                 this.message_id = null;
             }
+
+            // TODO javax.mail.FolderClosedException
 
             try {
                 String tdf_id = imap_message.getHeader("X-Tdfid")[0];
@@ -183,12 +197,13 @@ public class Email {
                 "     id             = " + id             + ",\n" +
                 "     direction      = " + direction      + ",\n" +
                 "     user_id        = " + user_id        + ",\n" +
-                "     client_id      = " + client_id      + ",\n" +
                 "     uid            = " + uid            + ",\n" +
                 "     message_id     = " + message_id     + ",\n" +
                 "     msgno          = " + msgno          + ",\n" +
                 "     from           = " + from           + ",\n" +
+                "     from_decode    = " + from_decode    + ",\n" +
                 "     to             = " + to             + ",\n" +
+                "     to_decode      = " + to_decode      + ",\n" +
                 "     in_replay_to   = " + in_replay_to   + ",\n" +
                 "     references     = " + references     + ",\n" +
                 "     date           = " + date           + ",\n" +
@@ -228,10 +243,6 @@ public class Email {
 
     public int getUser_id() {
         return user_id;
-    }
-
-    public int getClient_id() {
-        return client_id;
     }
 
     public long getUid() {
@@ -312,10 +323,6 @@ public class Email {
 
     public void setUser_id(int user_id) {
         this.user_id = user_id;
-    }
-
-    public void setClient_id(int client_id) {
-        this.client_id = client_id;
     }
 
     public void setUid(long uid) {
@@ -490,6 +497,22 @@ public class Email {
         this.tdf_id = tdf_id;
     }
 
+    public String getFrom_decode() {
+        return from_decode;
+    }
+
+    public void setFrom_decode(String from_decode) {
+        this.from_decode = from_decode;
+    }
+
+    public String getTo_decode() {
+        return to_decode;
+    }
+
+    public void setTo_decode(String to_decode) {
+        this.to_decode = to_decode;
+    }
+
     public static String removeBadChars(String s) {
         if (s == null) return null;
         StringBuffer sb = new StringBuffer();
@@ -497,7 +520,167 @@ public class Email {
             if (Character.isHighSurrogate(s.charAt(i))) { continue; }
             sb.append(s.charAt(i));
         }
+
         return sb.toString();
+    }
+
+    public static String getDecode(String dir, String emails) {
+        Pattern PCREpattern = Pattern.compile("\\r\\n|\\r|\\n");
+        Matcher em = PCREpattern.matcher(emails);
+        emails = em.replaceAll("");
+
+        String[] emails_arr = emails.split(",");
+
+        String decode = "";
+
+        for (String email: emails_arr) {
+            String[] parts = email.split(" ");
+
+            for (String part : parts) {
+                if (!part.equals("")) {
+                    Pattern pattern = Pattern.compile("=\\?(.*)\\?=");
+                    Matcher matcher = pattern.matcher(part);
+
+                    if (matcher.find()) {
+                        decode += stringDecode(part);
+                    } else {
+                        decode += " " + part;
+                    }
+                }
+            }
+
+            decode += ",";
+        }
+
+        decode = decode.substring(0, decode.length() - 1);
+
+        return decode;
+    }
+
+    public static String stringDecode(String string) {
+        String[] str_arr = string.split("\\?");
+
+        String decode    = "";
+        String encoding  = "";
+        String code_type = "";
+
+        byte[] byteCp = str_arr[3].getBytes();
+
+        str_arr[2] = str_arr[2].toLowerCase();
+
+        try {
+            switch (str_arr[1].toLowerCase()) {
+                case "koi8-r":
+                    if (str_arr[2].equals("b")) {
+                        decode = new String(Base64.getDecoder().decode(byteCp),  "KOI8-R");
+                        encoding = "koi8-r";
+                        code_type = "Base64";
+                    }
+                    if (str_arr[2].equals("q")) {
+                        decode = new String(QuotedPrintable.decode(byteCp, "KOI8-R").getBytes(), "KOI8-R");
+                        encoding  = "koi8-r";
+                        code_type = "Quoted";
+                    }
+                    break;
+                case "koi8-u":
+                    if (str_arr[2].equals("b")) {
+                        decode = new String(Base64.getDecoder().decode(byteCp),  "KOI8-U");
+                        encoding = "koi8-U";
+                        code_type = "Base64";
+                    }
+                    if (str_arr[2].equals("q")) {
+                        decode = new String(QuotedPrintable.decode(byteCp, "KOI8-U").getBytes(), "KOI8-U");
+                        encoding  = "koi8-U";
+                        code_type = "Quoted";
+                    }
+                    break;
+                case "windows-1251":
+                    if (str_arr[2].equals("b")) {
+                        decode = new String(Base64.getDecoder().decode(byteCp),  "windows-1251");
+                        encoding = "windows-1251";
+                        code_type = "Base64";
+                    }
+                    if (str_arr[2].equals("q")) {
+                        decode = new String(QuotedPrintable.decode(byteCp, "windows-1251").getBytes(), "windows-1251");
+                        encoding  = "windows-1251";
+                        code_type = "Quoted";
+                    }
+                    break;
+                case "utf-8":
+                    if (str_arr[2].equals("b")) {
+                        decode = new String(Base64.getDecoder().decode(byteCp), StandardCharsets.UTF_8);
+                        encoding = "utf-8";
+                        code_type = "Base64";
+                    }
+                    if (str_arr[2].equals("q")) {
+                        decode = new String(QuotedPrintable.decode(byteCp, "utf-8").getBytes(), StandardCharsets.UTF_8);
+                        encoding  = "utf-8";
+                        code_type = "Quoted";
+                    }
+                    break;
+                case "gb18030":
+                    decode = new String(Base64.getDecoder().decode(byteCp),  "gb18030");
+                    encoding = "gb18030";
+                    code_type = "Base64";
+                    break;
+                case "ks_c_5601-1987":
+                    decode = new String(Base64.getDecoder().decode(byteCp),  "CP949");
+                    encoding = "ks_c_5601-1987";
+                    code_type = "Base64";
+                    break;
+                case "iso-8859-9":
+                    decode = new String(Base64.getDecoder().decode(byteCp),  "iso-8859-9");
+                    encoding = "iso-8859-9";
+                    code_type = "Base64";
+                    break;
+                case "iso-8859-5":
+                    decode = new String(Base64.getDecoder().decode(byteCp),  "iso-8859-5");
+                    encoding = "iso-8859-5";
+                    code_type = "Base64";
+                    break;
+                case "iso-8859-1":
+                    decode = new String(Base64.getDecoder().decode(byteCp), StandardCharsets.ISO_8859_1);
+                    encoding = "iso-8859-1";
+                    code_type = "Base64";
+                    break;
+                case "iso-2022-jp":
+                    decode = new String(Base64.getDecoder().decode(byteCp),  "iso-2022-jp");
+                    encoding = "iso-2022-jp";
+                    code_type = "Base64";
+                    break;
+                case "gbk":
+                    if (str_arr[2].equals("b")) {
+                        decode = new String(Base64.getDecoder().decode(byteCp),  "gbk");
+                        encoding = "gbk";
+                        code_type = "Base64";
+                    }
+                    if (str_arr[2].equals("q")) {
+                        decode = new String(QuotedPrintable.decode(byteCp, "gbk").getBytes(), "gbk");
+                        encoding  = "gbk";
+                        code_type = "Quoted";
+                    }
+                case "gb2312":
+                    decode = new String(Base64.getDecoder().decode(byteCp),  "gb2312");
+                    encoding = "gb2312";
+                    code_type = "Base64";
+                    break;
+                case "cp1251": // TODO
+                    decode = new String(Base64.getDecoder().decode(byteCp),  "gb2312");
+                    encoding = "";
+                    code_type = "";
+                    break;
+                default: // TODO
+                    decode = new String(Base64.getDecoder().decode(byteCp),  str_arr[1].toLowerCase());
+                    encoding = "";
+                    code_type = "";
+                    break;
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return decode;
     }
 
 }

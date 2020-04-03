@@ -1,18 +1,14 @@
 package com.threads;
 
 import com.Main;
-import com.classes.Email;
 import com.classes.EmailAccount;
 import com.classes.MyFolder;
 import com.classes.User;
 import com.db.DB;
 import com.sun.mail.imap.IMAPFolder;
 
-import javax.mail.Folder;
 import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.Store;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
@@ -120,6 +116,14 @@ public class Mailing implements Runnable {
                             Period period = Period.between(message_date, now);
 
                             System.err.println("== " + period.getDays() + " ==");
+
+                            if (period.getDays() <= 7) {
+                                restartFolder(emailAccount, myFolder_tmp);
+//                                stopFolder(folderEntry.getValue());
+//                                emailAccount.getMyFoldersMap().remove(folderEntry.getKey());
+//                                mailingEmailAccount_tmp.addFolder(folderEntry.getValue().getImap_folder(), folderEntry.getValue().getSession(), folderEntry.getValue().getEs());
+                                continue;
+                            }
                         }
 
                         continue;
@@ -131,24 +135,28 @@ public class Mailing implements Runnable {
                 if (
 //                        true
 //                        myFolder_tmp.getThread_problem() > 0 &&
-                        status.equals("error")    ||
-                        status.equals("close")    ||
-                        status.equals("closed")   ||
-                        myFolder_tmp.getCount_restart_success() > 1 ||
-                        (
-                            myFolder_tmp.getThread_problem() > 0 &&
-                            myFolder_tmp.getTime_last_noop() < (new Date().getTime() / 1000 - 360)
-                        )
+                    status.equals("error")    ||
+                    status.equals("close")    ||
+                    status.equals("closed")   ||
+                    myFolder_tmp.getCount_restart_success() > 1 ||
+                    (
+                        myFolder_tmp.getThread_problem() > 0 &&
+                        myFolder_tmp.getTime_last_noop() < (new Date().getTime() / 1000 - 360)
+                    )
                 ) {
-                    rebootFolder(folderEntry.getValue());
+                    stopFolder(folderEntry.getValue());
                     emailAccount.getMyFoldersMap().remove(folderEntry.getKey());
-                    mailingEmailAccount_tmp.addFolder(folderEntry.getValue().getImap_folder(), folderEntry.getValue().getSession(), folderEntry.getValue().getEs());
+                    mailingEmailAccount_tmp.addFolder(
+                        folderEntry.getValue().getImap_folder(),
+                        folderEntry.getValue().getSession(),
+                        folderEntry.getValue().getEs()
+                    );
                 }
             }
         }
     }
 
-    private void rebootFolder(MyFolder folder_tmp) {
+    public static void stopFolder(MyFolder folder_tmp) {
         try {
             IMAPFolder imapFolder_tmp = folder_tmp.getImap_folder();
 
@@ -169,13 +177,30 @@ public class Mailing implements Runnable {
         }
     }
 
-    private void addEmailAccount(EmailAccount emailAccount) {
+    private static void addEmailAccount(EmailAccount emailAccount) {
         Thread startMailThread = new Thread(new MailingEmailAccountThread(emailAccount)); // Создание потока для синхронизации всего почтового ящика // TODO old_messages
         emailAccount.setThread(startMailThread);
         startMailThread.setName("MailingEmailAccountThread " + MailingEmailAccountThread.getIndex());
         emailAccounts.put(emailAccount.getEmailAddress(), emailAccount);
         startMailThread.setDaemon(true);
         startMailThread.start(); // Запус потока
+    }
+
+    public static void restartAccount(String account_name) {
+        EmailAccount emailAccount_tmp = emailAccounts.get(account_name);
+
+        ConcurrentHashMap<String, MyFolder> myFolders_tmp = emailAccount_tmp.getMyFoldersMap();
+
+        if (myFolders_tmp.size() > 0) {
+            for (Map.Entry<String, MyFolder> folderEntry : myFolders_tmp.entrySet()) {
+                MyFolder myFolder_tmp = folderEntry.getValue();
+                stopFolder(myFolder_tmp);
+            }
+        }
+
+        emailAccount_tmp.getThread().stop();
+        emailAccounts.remove(account_name);
+        addEmailAccount(emailAccount_tmp);
     }
 
     public IMAPFolder reopenFolder(MyFolder myFolder) {
@@ -222,6 +247,33 @@ public class Mailing implements Runnable {
         }
 
         return imap_folder;
+    }
+
+    public static void restartFolder(String account_name, String folder_name) {
+        EmailAccount emailAccount = emailAccounts.get(account_name);
+        MyFolder myFolder = emailAccount.getFoldersMap().get(folder_name);
+
+        restartFolder(emailAccount, myFolder);
+    }
+
+    public static void restartFolder(EmailAccount emailAccount, MyFolder myFolder) {
+        stopFolder(myFolder);
+        emailAccount.getMyFoldersMap().remove(myFolder.getFolder_name());
+
+        emailAccount.addMyFolder(myFolder);
+        Thread myTreadAllMails = new Thread(
+                new AddNewMessageThread(
+                        emailAccount,
+                        myFolder,
+                        myFolder.getImap_folder(),
+                        myFolder.getSession(),
+                        myFolder.getEs()
+                )
+        ); // Создание потока для синхронизации всего почтового ящика
+        myFolder.setThread(myTreadAllMails);
+        myTreadAllMails.setName("AddNewMessageThread " + AddNewMessageThread.getIndex());
+        myTreadAllMails.setDaemon(true);
+        myTreadAllMails.start();
     }
 
 }

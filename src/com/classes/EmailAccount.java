@@ -1,5 +1,8 @@
 package com.classes;
 
+import com.Main;
+import com.db.DB;
+
 import java.io.Serializable;
 import java.util.Base64;
 import java.util.Date;
@@ -253,7 +256,7 @@ public class EmailAccount implements Serializable {
         StringBuffer tmpStr = new StringBuffer("{ ");
 
         for(Map.Entry<String, MyFolder> e: map.entrySet()){
-            tmpStr.append("\"").append(e.getKey()).append("\": ").append(e.getValue()).append(",");
+            tmpStr.append("\"").append(e.getKey().replace("\"", "\\\\\"")).append("\": ").append(e.getValue()).append(",");
         }
 
         return tmpStr.substring(0, tmpStr.length() - 1) + "}";
