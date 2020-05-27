@@ -20,7 +20,7 @@ public class Suicide implements Runnable {
         wssChatClient.connectToWSS();
 
         while (true) {
-            System.out.print(" timer " + ++timer + " (" + Thread.activeCount() + ") ");
+//            System.out.print(" timer " + ++timer + " (" + Thread.activeCount() + ") "); // TODO on
 
 //            System.out.print(" (" + Thread.activeCount() + "," + ManagementFactory.getThreadMXBean().getThreadCount() + "," + ManagementFactory.getRuntimeMXBean().getName() + "," + ManagementFactory.getMemoryMXBean().getObjectPendingFinalizationCount() + ") ");
 //            System.out.println();

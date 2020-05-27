@@ -115,7 +115,7 @@ public class Mailing implements Runnable {
 
                             Period period = Period.between(message_date, now);
 
-                            System.err.println("== " + period.getDays() + " ==");
+//                            System.err.println("== " + period.getDays() + " ==");
 
                             if (period.getDays() <= 7) {
                                 restartFolder(emailAccount, myFolder_tmp);
