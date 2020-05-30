@@ -56,8 +56,8 @@ public class Main {
                 }
 
 //                listThreads(rootGroup, "");
-                System.out.println("=================================================================================");
-                countThreads(rootGroup, "");
+//                System.out.println("=================================================================================");
+//                countThreads(rootGroup, ""); // TODO on
 
             }
         } catch (Exception e) {

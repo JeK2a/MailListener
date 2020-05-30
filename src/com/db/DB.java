@@ -236,6 +236,8 @@ public class DB implements AutoCloseable {
         } catch (Exception e) {
             System.err.println("addEmail error"); // TODO tmp
             System.err.println("===============================");
+            System.err.println("|||" + email.getMessage_id() + "|||");
+            System.err.println("===============================");
             System.err.println(email.getFrom());
             System.err.println("===============================");
             System.err.println(email.getFrom_decode());
@@ -718,9 +720,10 @@ public class DB implements AutoCloseable {
             "DELETE `a_api_emails` " +
             "SET `deleted` = 1, " +
             "    `time` = '" + new Timestamp(new Date().getTime()) + "' " +
-            "WHERE  `user_id` = '"+user_id+"' AND " +
-            "    `folder` = '"+folder_name+"' AND " +
-            "    `uid` = '"+uid+"'";
+            "WHERE  " +
+            "    `user_id` = '" + user_id     + "' AND " +
+            "    `folder`  = '" + folder_name + "' AND " +
+            "    `uid`     = '" + uid + "'";
 
         return updateQuery(query);
     }

@@ -98,7 +98,7 @@ public class Test {
 //                        System.out.println("(" + Thread.activeCount() + ")");
 //                    });
 
-                    System.out.println(emailAccount.getEmailAddress() + " - " + folder.getFullName());
+//                    System.out.println(emailAccount.getEmailAddress() + " - " + folder.getFullName());
 
                     String out = (String) folder.doCommand(imapProtocol -> {
 //                    Response[] responses = imapProtocol.command("FETCH " + imap_message.getMessageNumber() + " (FLAGS UID)", null); // TODO
