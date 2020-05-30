@@ -25,10 +25,6 @@ public class MyProperties extends Properties {
 
         put("mail.imap.usesocketchannels", "true");
 
-        put("mail.imap.partialfetch", "false"); // TODO new
-        // TODO Q: The IMAP provider seems to lose data when I fetch messages with large attachments.
-        // TODO This is due to bugs in the partial fetch implementation of your IMAP server. To workaround this server bug, set the "mail.imap.partialfetch" property to "false". Refer to NOTES.txt from the JavaMail package for more information
-
         // создать или выбрать соответствующую очередь событий
 //        put("mail.event.scope", "session"); //
         put("mail.event.scope", "application");

@@ -16,7 +16,6 @@ import javax.mail.event.ConnectionEvent;
 import javax.mail.event.ConnectionListener;
 import javax.mail.event.MessageCountEvent;
 import javax.mail.event.MessageCountListener;
-import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
@@ -84,7 +83,7 @@ public class AddNewMessageThread implements Runnable {
         try {
             idleManager = myFolder.getIdleManager();
             if (idleManager != null) {
-//                System.out.println("======================================== STOP ===================================");
+                System.out.println("======================================== STOP ===================================");
                 idleManager.stop();
             }
             idleManager = new IdleManager(session, es);
@@ -145,7 +144,7 @@ public class AddNewMessageThread implements Runnable {
 
                 period = Period.between(message_date, now);
 
-//                System.err.println("-- " + period.getDays() + " --");
+                System.err.println("-- " + period.getDays() + " --");
             }
 
             if (
@@ -318,7 +317,7 @@ public class AddNewMessageThread implements Runnable {
                     end = count_all;
                 }
 
-//                System.out.println(count_all + " - " + start + " / " + end);
+                System.out.println(count_all + " - " + start + " / " + end);
 
                 Message[] messages_tmp = Arrays.copyOfRange(messages, start, end);
 
@@ -391,9 +390,6 @@ public class AddNewMessageThread implements Runnable {
     }
 
     private void checkRemoved(String email, String folder_name) {
-
-        long[] uids_tmp = null;
-
         try {
             checkFolder(imap_folder);
             
@@ -481,7 +477,7 @@ public class AddNewMessageThread implements Runnable {
                     db.setRemoved(email, folder_name, uid_start, uid_end, arr_uids); //set removed
                     if (reopenFolder("fetchMessages")) { // TODO
 
-                        uids_tmp = db.getMissingUIDs(
+                        long[] uids_tmp = db.getMissingUIDs(
                                 email_address,
                                 folder_name,
                                 uid_start,
@@ -489,104 +485,12 @@ public class AddNewMessageThread implements Runnable {
                                 arr_uids
                         );
 
-                        // TODO добавить два механизма уменьшения команды на подгрузку сообщений
-                        // TODO 1-й преобразование перечисления uid в промежутки (пример: 1,2,3,4,6,8,9,11 -> 1-4, 6-9, 11)
-                        // TODO 2-й разбитие длинного перечисления по 70 uids
-                        // TODO 2-й может доформироваться из отдельных uid 1-го способа
-
-                        if (uids_tmp.length > 0) {
-                            // 1-й
-
-                            int limit = 70;
-                            int uids_count = uids_tmp.length;
-                            uid_start = uids_tmp[0];
-                            uid_end   = uids_tmp[0];
-                            ArrayList<Long> uids_list = new ArrayList<>();
-
-                            for (int i = 0; uids_count > i; i++) {
-                                if (
-                                    uids_count == i + 1 ||
-                                    ((uids_tmp[i] + 1) != uids_tmp[i + 1])
-                                ) {
-                                    if (uid_start == uid_end) {
-                                        uids_list.add(uid_start);
-
-                                        if (uids_list.size() == limit) {
-
-                                            long[] uid_arr = new long[uids_list.size()];
-
-                                            for (int n = 0; uids_list.size() > n; n++) {
-                                                uid_arr[n] = uids_list.get(n);
-                                            }
-
-                                            fetchMessages(
-                                                imap_folder.getMessagesByUID(
-                                                    uid_arr
-                                                )
-                                            );
-
-                                            uids_list.clear();
-                                        }
-                                    } else {
-                                        fetchMessages(
-                                            imap_folder.getMessagesByUID(
-                                                uid_start,
-                                                uid_end
-                                            )
-                                        );
-                                    }
-
-                                    if (uids_count > i + 1) {
-                                        uid_start = uids_tmp[i + 1];
-                                    }
-                                }
-
-                                if (uids_count > i + 1) {
-                                    uid_end = uids_tmp[i + 1];
-                                }
-                            }
-
-                            if (uids_list.size() > 0) {
-
-                                long[] uid_arr = new long[uids_list.size()];
-
-                                for (int i = 0; uids_list.size() > i; i++) {
-                                    uid_arr[i] = uids_list.get(i);
-                                }
-
-                                fetchMessages(
-                                    imap_folder.getMessagesByUID(
-                                        uid_arr
-                                    )
-                                );
-
-                            }
-
-                            // END 1-й
-
-
-
-                            // 2-й
-//                            int limit = 70;
-//                            long[] uid_slice = new long[limit];
-//                            int count = (int) uids_tmp.length / limit;
-//
-//                            for (int i = 0; count < i; i++) {
-//                                System.err.println("~~~~~~" + uids_tmp.length + "~~~~~~");
-//                                System.arraycopy(uids_tmp, i * limit, uid_slice, 0, uids_tmp.length);
-//
-//                                reopenFolder("fetchMessages");
-//
-//                                System.out.println(i + " ~~~ " + i * limit + " ~~~ " + Arrays.toString(uid_slice));
-//
-//                                fetchMessages(
-//                                        imap_folder.getMessagesByUID(
-//                                                uids_tmp
-//                                        )
-//                                ); // add missing messages
-//                            }
-                            // END 2-й
-                        }
+                        reopenFolder("fetchMessages");
+                        fetchMessages(
+                            imap_folder.getMessagesByUID(
+                                uids_tmp
+                            )
+                        ); // add missing messages
                     }
                 }
 
@@ -597,12 +501,9 @@ public class AddNewMessageThread implements Runnable {
                 }
             }
 
-            reopenFolder("getCount");
-
             this.myFolder.setMessages_count(imap_folder.getMessageCount());
             this.myFolder.setMessages_db_count(db.getCountMessages(email_address, folder_name));
         } catch (Exception e) {
-            System.err.println("~~~~~~" + uids_tmp.length + "~~~~~~");
             myFolder.setException(e);
         }
     }
@@ -788,7 +689,7 @@ public class AddNewMessageThread implements Runnable {
 
         imap_folder.addMessageChangedListener(messageChangedEvent -> {
 
-//            System.err.println("messageChangedEvent");
+            System.err.println("messageChangedEvent");
 
             try {
                 myFolder.updateTime_last_event();

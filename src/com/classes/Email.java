@@ -677,9 +677,6 @@ public class Email {
 
             }
         } catch (Exception e) {
-            System.err.println(Arrays.toString(str_arr));
-            System.err.println(Arrays.toString(byteCp));
-
             e.printStackTrace();
         }
 
