@@ -87,7 +87,7 @@ public class Email {
 
             String from = InternetAddress.toString(imap_message.getFrom());
             this.from = (from == null || from.equals("") ? "null" : from);
-            this.from_decode = getDecode("from", this.from);
+            this.from_decode = getDecode(this.from);
 
             assert from != null;
 //            this.direction = from.contains(email_account) ? "out" : "in"; // TODO проверить
@@ -97,7 +97,7 @@ public class Email {
 
             String to = InternetAddress.toString(imap_message.getRecipients(Message.RecipientType.TO));
             this.to = (to == null || to.equals("") ? "null" : to);
-            this.to_decode = getDecode("to", this.to);
+            this.to_decode = getDecode(this.to);
 
             this.user_id = user_id;
 
@@ -524,7 +524,7 @@ public class Email {
         return sb.toString();
     }
 
-    public static String getDecode(String dir, String emails) {
+    public static String getDecode(String emails) {
         Pattern PCREpattern = Pattern.compile("\\r\\n|\\r|\\n");
         Matcher em = PCREpattern.matcher(emails);
         emails = em.replaceAll("");
@@ -638,7 +638,10 @@ public class Email {
                     encoding = "iso-8859-5";
                     code_type = "Base64";
                     break;
-                case "iso-8859-1":
+                case "iso-8859-1": // TODO 
+//                    [	=, ISO-8859-1, q, serdar_g=FCven, =]
+//                    [115, 101, 114, 100, 97, 114, 95, 103, 61, 70, 67, 118, 101, 110]
+//                    java.lang.IllegalArgumentException: Illegal base64 character 5f
                     decode = new String(Base64.getDecoder().decode(byteCp), StandardCharsets.ISO_8859_1);
                     encoding = "iso-8859-1";
                     code_type = "Base64";
@@ -660,6 +663,7 @@ public class Email {
                         code_type = "Quoted";
                     }
                 case "gb2312":
+
                     decode = new String(Base64.getDecoder().decode(byteCp),  "gb2312");
                     encoding = "gb2312";
                     code_type = "Base64";
@@ -677,6 +681,7 @@ public class Email {
 
             }
         } catch (Exception e) {
+            System.err.println(string);
             System.err.println(Arrays.toString(str_arr));
             System.err.println(Arrays.toString(byteCp));
 
