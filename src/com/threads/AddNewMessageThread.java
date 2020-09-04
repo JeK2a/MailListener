@@ -196,12 +196,13 @@ public class AddNewMessageThread implements Runnable {
             assert idleManager != null;
             idleManager.stop();
 
-
 //            myFolder.setStatus("closed");
         }
     }
 
     private boolean checkOldMails(String email_address, String folder_name) throws MessagingException {
+
+        try {
 
         myFolder.setStatus("checkOldMails start");
 
@@ -245,6 +246,9 @@ public class AddNewMessageThread implements Runnable {
 //                System.out.println(messages_count_db + " / " + messages_count_mail);
 
                 long last_uid_db   = db.getLastAddUID(emailAccount.getEmailAddress(), folder_name);
+
+                reopenFolder("Test");
+
                 long last_uid_mail = messages_tmp.length > 0 ? imap_folder.getUID(messages_tmp[messages_tmp.length - 1]) : 0;
 
                 if (last_uid_db > 0 && checkRandomMessages(last_uid_db)) {
@@ -273,6 +277,21 @@ public class AddNewMessageThread implements Runnable {
         }
 
         myFolder.setStatus("checkOldMails end ");
+
+        } catch (Exception e) {
+            myFolder.setException(e);
+            e.printStackTrace();
+
+            reopenFolder("catch");
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            }
+
+            return checkOldMails(email_address, folder_name);
+        }
 
         return false;
     }
@@ -511,13 +530,15 @@ public class AddNewMessageThread implements Runnable {
                                     if (uid_start == uid_end) {
                                         uids_list.add(uid_start);
 
-                                        if (uids_list.size() == limit) {
+                                        if (uids_list.size() >= limit) {
 
                                             long[] uid_arr = new long[uids_list.size()];
 
                                             for (int n = 0; uids_list.size() > n; n++) {
                                                 uid_arr[n] = uids_list.get(n);
                                             }
+
+                                            System.err.println(Arrays.toString(uid_arr)  + " §§§§§§§§ ]");
 
                                             fetchMessages(
                                                 imap_folder.getMessagesByUID(
@@ -528,12 +549,41 @@ public class AddNewMessageThread implements Runnable {
                                             uids_list.clear();
                                         }
                                     } else {
-                                        fetchMessages(
-                                            imap_folder.getMessagesByUID(
-                                                uid_start,
-                                                uid_end
-                                            )
-                                        );
+                                        System.err.println(uid_start + " §§§§§§§§ " + uid_end);
+
+//                                        reopenFolder("fetchMessages");
+
+                                        int count_n = (int) ((uid_end - uid_start) / limit);
+
+                                        System.err.println("count_n = " + count_n);
+
+                                        if (count_n < 1) {
+                                            System.err.println(uid_start + " §++++++§ " + uid_end);
+
+                                            fetchMessages(
+                                                imap_folder.getMessagesByUID(
+                                                    uid_start,
+                                                    uid_end
+                                                )
+                                            );
+                                        } else {
+                                            long uid_start_tmp = uid_start ;
+                                            long uid_end_tmp   = uid_start_tmp + limit;
+
+                                            for (int n = 0; n < count_n + 1; n++) {
+                                                System.err.println(uid_start_tmp + " §------§ " + uid_end_tmp + " n = " + n);
+
+//                                                fetchMessages(
+//                                                    imap_folder.getMessagesByUID(
+//                                                        uid_start_tmp,
+//                                                        uid_end_tmp
+//                                                    )
+//                                                );
+
+                                                uid_start_tmp = uid_end_tmp + 1;
+                                                uid_end_tmp   = uid_start_tmp + limit;
+                                            }
+                                        }
                                     }
 
                                     if (uids_count > i + 1) {
@@ -553,6 +603,8 @@ public class AddNewMessageThread implements Runnable {
                                 for (int i = 0; uids_list.size() > i; i++) {
                                     uid_arr[i] = uids_list.get(i);
                                 }
+
+                                System.err.println(Arrays.toString(uid_arr)  + " §§§§§§§§ ]");
 
                                 fetchMessages(
                                     imap_folder.getMessagesByUID(
@@ -795,8 +847,17 @@ public class AddNewMessageThread implements Runnable {
 
                 IMAPMessage imap_message = (IMAPMessage) messageChangedEvent.getMessage();
 
-                db.addEmail(new Email(user_id, email_address, imap_message, folder_name, imap_folder));
+                Email email_tmp = new Email(user_id, email_address, imap_message, folder_name, imap_folder);
 
+                db.addEmail(email_tmp);
+
+                MessageChangedThread messageChangedThread = new MessageChangedThread(email_tmp);
+
+                Thread thread = new Thread(messageChangedThread);
+
+                thread.setName("MessageChangedThread " + MessageChangedThread.getIndex());
+                thread.setDaemon(true);
+                thread.start();
             } catch (Exception e) {
                 myFolder.setException(e);
             }

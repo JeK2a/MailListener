@@ -132,10 +132,8 @@ public class WSSChatClient {
     }
 
     public static void sendText(String subject, String text) {
-
         if (webSocket != null && webSocket.isOpen()) {
             text = forJSON(text);
-
             webSocket.sendText("{\"subject\":\"" + subject + "\", \"message\":\"" + text + "\"}");
         } else {
             System.err.println("error send");

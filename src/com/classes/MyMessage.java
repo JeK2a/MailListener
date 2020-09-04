@@ -391,6 +391,10 @@ public class MyMessage {
             return true; // TODO null
         }
 
+        if (str1.toLowerCase().equals(str2.toLowerCase())) {
+            return true;
+        }
+
         if ((str1 == null || str2 == null) || (str1.equals("null") || str2.equals("null"))) {
             return ((str1 == null || str1.equals("null")) && (str2 == null || str2.equals("null")));
         }

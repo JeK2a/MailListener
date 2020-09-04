@@ -216,12 +216,17 @@ public class DB implements AutoCloseable {
             prepare_statement_tmp.setString(32, email.getTdf_id());
 
             prepare_statement_tmp.executeUpdate();
-
         } catch (
             com.mysql.jdbc.exceptions.jdbc4.CommunicationsException |
             com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException e
         ) {
             e.printStackTrace();
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException interruptedException) {
+                interruptedException.printStackTrace();
+            }
+
             if (++count_errors > 10) {
                 return false;
             } else {
@@ -235,98 +240,10 @@ public class DB implements AutoCloseable {
             System.err.println(query);
         } catch (Exception e) {
             System.err.println("addEmail error"); // TODO tmp
-            System.err.println("===============================");
-            System.err.println("|||" + email.getMessage_id() + "|||");
-            System.err.println("===============================");
-            System.err.println(email.getTo());
-            System.err.println(email.getFrom());
-            System.err.println("===============================");
-            System.err.println(email.getTo_decode());
-            System.err.println(email.getFrom_decode());
-            System.err.println("===============================");
             System.err.println(query);
             e.printStackTrace();
 
             return reAddEmail(email);
-        }
-
-        return true;
-    }
-
-    public boolean addEmailTest() {
-
-        String from_decode = "";
-
-        String query = "" +
-                "INSERT INTO `a_api_emails`( " +
-                "    `email_account`, "  + //29
-                "    `folder`, "         + //14
-                "    `uid`, "            + // 3
-
-                "    `from`, "           + // 5
-                "    `from_decode`, "           + // 5
-                "    `to`, "             + // 6
-                "    `to_decode`, "             + // 6
-                "    `subject`, "        + //13
-
-
-                "    `references`, "        + //13
-                "    `size`, "        + //13
-                "    `answered`, "        + //13
-                "    `message_date` "        + //13
-                ") "                     +
-                "VALUES (?,?,?,?,?,?,?,?,'',0,0,NOW()) " +
-                "    ON DUPLICATE KEY UPDATE " +
-                "        `email_account`  = VALUES(`email_account`), "  +
-                "        `folder`         = VALUES(`folder`), "         +
-                "        `uid`            = VALUES(`uid`), "            +
-
-                "        `from`           = VALUES(`from`), "           +
-                "        `from_decode`    = VALUES(`from_decode`), "    +
-                "        `to`             = VALUES(`to`), "             +
-                "        `to_decode`      = VALUES(`to_decode`), "      +
-                "        `subject`        = VALUES(`subject`) "         +
-                ";";
-
-        try {
-            incCount_queries();
-            PreparedStatement prepare_statement_tmp = con.prepareStatement(query);
-
-            prepare_statement_tmp.setString(1, "123");
-            prepare_statement_tmp.setString(2, "123");
-            prepare_statement_tmp.setLong(3, 123);
-
-            String from = "=?utf-8?b?0JLQsNGI0LAg0K/QvdC00LXQutGBLtCc0YPQt9GL0LrQsCDwn5GL?= <hello@yandex-team.ru>";
-
-
-            from_decode = Email.getDecode(from);
-            from_decode = "Ваша Яндекс.Музыка \uD83D\uDC4B <hello@yandex-team.ru>";
-
-            prepare_statement_tmp.setString(4, from);
-            prepare_statement_tmp.setString(5, from_decode);
-            prepare_statement_tmp.setString(6, from);
-            prepare_statement_tmp.setString(7, from_decode);
-            prepare_statement_tmp.setString(8, from_decode);
-
-            prepare_statement_tmp.executeUpdate();
-
-        } catch (
-                com.mysql.jdbc.exceptions.jdbc4.CommunicationsException |
-                com.mysql.jdbc.exceptions.jdbc4.MySQLNonTransientConnectionException e
-        ) {
-            e.printStackTrace();
-
-        } catch (com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException e) {
-            e.printStackTrace();
-            System.err.println(query);
-        } catch (Exception e) {
-            System.err.println("addEmail error"); // TODO tmp
-            System.err.println("===============================");
-            System.err.println("|||" + from_decode + "|||");
-            System.err.println("===============================");
-            System.err.println(query);
-            e.printStackTrace();
-
         }
 
         return true;
@@ -371,13 +288,15 @@ public class DB implements AutoCloseable {
             "WHERE " +
 //            "   `users`.`id` = 304 " +
 //                "   `id` = 538 " +
-//            "   `users`.`email` = \"zakupkiship@tdfort.ru\" " +
+//            "   `users`.`email` = \"sl@tdfort.ru\" " +
 //            "   `users`.`email` = \"me@tdfort.ru\" " +
             "   `users`.`is_monitoring` = 1 " +
             "ORDER  BY `users`.`email`;"
 //                +
 //                "`success` = 1"
         ; // TODO success
+
+        System.out.println(query);
 
         ArrayList<User> users = new ArrayList<>();
 

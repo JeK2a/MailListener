@@ -156,7 +156,6 @@ public class Email {
             if (uid > 0) {
                 this.uid = uid;
             } else {
-//                this.uid = imap_folder.getUID(imap_message);
                 this.uid = imapFolder.getUID(imap_message);
             }
 
@@ -561,8 +560,6 @@ public class Email {
         String[] str_arr = string.split("\\?");
 
         String decode    = "";
-        String encoding  = "";
-        String code_type = "";
 
         byte[] byteCp = str_arr[3].getBytes();
 
@@ -573,112 +570,91 @@ public class Email {
                 case "koi8-r":
                     if (str_arr[2].equals("b")) {
                         decode = new String(Base64.getDecoder().decode(byteCp),  "KOI8-R");
-                        encoding = "koi8-r";
-                        code_type = "Base64";
                     }
                     if (str_arr[2].equals("q")) {
-                        decode = new String(QuotedPrintable.decode(byteCp, "KOI8-R").getBytes(), "KOI8-R");
-                        encoding  = "koi8-r";
-                        code_type = "Quoted";
+                        decode = new String(QuotedPrintable.decode(byteCp, "KOI8-R").getBytes(), StandardCharsets.UTF_8);
                     }
+
                     break;
                 case "koi8-u":
                     if (str_arr[2].equals("b")) {
                         decode = new String(Base64.getDecoder().decode(byteCp),  "KOI8-U");
-                        encoding = "koi8-U";
-                        code_type = "Base64";
                     }
                     if (str_arr[2].equals("q")) {
-                        decode = new String(QuotedPrintable.decode(byteCp, "KOI8-U").getBytes(), "KOI8-U");
-                        encoding  = "koi8-U";
-                        code_type = "Quoted";
+                        decode = new String(QuotedPrintable.decode(byteCp, "KOI8-U").getBytes(), StandardCharsets.UTF_8);
                     }
+
                     break;
                 case "windows-1251":
                     if (str_arr[2].equals("b")) {
-                        decode = new String(Base64.getDecoder().decode(byteCp),  "windows-1251");
-                        encoding = "windows-1251";
-                        code_type = "Base64";
+//                        decode = new String(Base64.getDecoder().decode(byteCp),  "windows-1251");
+                        decode = new String(QuotedPrintable.decode(byteCp, "windows-1251").getBytes(), StandardCharsets.UTF_8);
+
                     }
                     if (str_arr[2].equals("q")) {
-                        decode = new String(QuotedPrintable.decode(byteCp, "windows-1251").getBytes(), "windows-1251");
-                        encoding  = "windows-1251";
-                        code_type = "Quoted";
+                        decode = new String(QuotedPrintable.decode(byteCp, "windows-1251").getBytes(), StandardCharsets.UTF_8);
                     }
+
                     break;
                 case "utf-8":
+                case "utf8":
                     if (str_arr[2].equals("b")) {
                         decode = new String(Base64.getDecoder().decode(byteCp), StandardCharsets.UTF_8);
-                        encoding = "utf-8";
-                        code_type = "Base64";
                     }
                     if (str_arr[2].equals("q")) {
                         decode = new String(QuotedPrintable.decode(byteCp, "utf-8").getBytes(), StandardCharsets.UTF_8);
-                        encoding  = "utf-8";
-                        code_type = "Quoted";
                     }
                     break;
                 case "gb18030":
-                    decode = new String(Base64.getDecoder().decode(byteCp),  "gb18030");
-                    encoding = "gb18030";
-                    code_type = "Base64";
+                    if (str_arr[2].equals("b")) {
+                        decode = new String(Base64.getDecoder().decode(byteCp),  "gb18030");
+                    }
+                    if (str_arr[2].equals("q")) {
+                        decode = new String(QuotedPrintable.decode(byteCp, "gb18030").getBytes(), StandardCharsets.UTF_8);
+                    }
                     break;
                 case "ks_c_5601-1987":
                     decode = new String(Base64.getDecoder().decode(byteCp),  "CP949");
-                    encoding = "ks_c_5601-1987";
-                    code_type = "Base64";
                     break;
                 case "iso-8859-9":
                     decode = new String(Base64.getDecoder().decode(byteCp),  "iso-8859-9");
-                    encoding = "iso-8859-9";
-                    code_type = "Base64";
                     break;
                 case "iso-8859-5":
-                    decode = new String(Base64.getDecoder().decode(byteCp),  "iso-8859-5");
-                    encoding = "iso-8859-5";
-                    code_type = "Base64";
+                    if (str_arr[2].equals("b")) {
+                        decode = new String(Base64.getDecoder().decode(byteCp),  "iso-8859-5");
+                    }
+                    if (str_arr[2].equals("q")) {
+                        decode = new String(QuotedPrintable.decode(byteCp, "iso-8859-5").getBytes(), StandardCharsets.UTF_8);
+                    }
                     break;
                 case "iso-8859-1": // TODO 
-//                    [	=, ISO-8859-1, q, serdar_g=FCven, =]
-//                    [115, 101, 114, 100, 97, 114, 95, 103, 61, 70, 67, 118, 101, 110]
-//                    java.lang.IllegalArgumentException: Illegal base64 character 5f
-                    decode = new String(Base64.getDecoder().decode(byteCp), StandardCharsets.ISO_8859_1);
-                    encoding = "iso-8859-1";
-                    code_type = "Base64";
+                    if (str_arr[2].equals("b")) {
+                        decode = new String(Base64.getDecoder().decode(byteCp),  "iso-8859-1");
+                    }
+                    if (str_arr[2].equals("q")) {
+                        decode = new String(QuotedPrintable.decode(byteCp, "iso-8859-1").getBytes(), StandardCharsets.UTF_8);
+                    }
                     break;
                 case "iso-2022-jp":
                     decode = new String(Base64.getDecoder().decode(byteCp),  "iso-2022-jp");
-                    encoding = "iso-2022-jp";
-                    code_type = "Base64";
                     break;
                 case "gbk":
                     if (str_arr[2].equals("b")) {
                         decode = new String(Base64.getDecoder().decode(byteCp),  "gbk");
-                        encoding = "gbk";
-                        code_type = "Base64";
                     }
                     if (str_arr[2].equals("q")) {
-                        decode = new String(QuotedPrintable.decode(byteCp, "gbk").getBytes(), "gbk");
-                        encoding  = "gbk";
-                        code_type = "Quoted";
+                        decode = new String(QuotedPrintable.decode(byteCp, "gbk").getBytes(), StandardCharsets.UTF_8);
                     }
+                    break;
                 case "gb2312":
-
                     decode = new String(Base64.getDecoder().decode(byteCp),  "gb2312");
-                    encoding = "gb2312";
-                    code_type = "Base64";
                     break;
                 case "cp1251": // TODO
                     decode = new String(Base64.getDecoder().decode(byteCp),  "gb2312");
-                    encoding = "";
-                    code_type = "";
                     break;
                 default: // TODO
                     decode = new String(Base64.getDecoder().decode(byteCp),  str_arr[1].toLowerCase());
-                    encoding = "";
-                    code_type = "";
                     break;
-
             }
         } catch (Exception e) {
             System.err.println(string);

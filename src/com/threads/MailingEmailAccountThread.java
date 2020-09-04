@@ -146,9 +146,8 @@ public class MailingEmailAccountThread implements Runnable {
                 try {
                     emailAccount.setException(folderEvent.getFolder().getFullName() + " folder deleted"); // TODO тзменять статус папки
 
-                    IMAPFolder folder_tmp = (IMAPFolder) folderEvent.getFolder();
-                    String folder_name = folder_tmp.getFullName();
-
+                    IMAPFolder folder_tmp  = (IMAPFolder) folderEvent.getFolder();
+                    String folder_name     = folder_tmp.getFullName();
                     IMAPMessage[] messages = (IMAPMessage[]) folder_tmp.getMessages();
 
                     for (IMAPMessage imap_message : messages) {
