@@ -24,15 +24,18 @@ public class Testing {
 
     public static void main(String[] args) {
 
-        String flegs_json = "{" +
-                "'Deleted':1," +
-                "'Answered':1," +
-                "'Draft':1," +
-                "'Flagged':1," +
-                "'Seen':1"     +
-                "}";
-        String domin    = "https://my.tdfort.ru/index.php";
-        String params = "page=ordersapi&action=flagstate&email=vipjonpc@mail.ru&folder=&uid=12345678&flag=" + flegs_json;
+
+
+
+//        String flegs_json = "{" +
+//                "'Deleted':1," +
+//                "'Answered':1," +
+//                "'Draft':1," +
+//                "'Flagged':1," +
+//                "'Seen':1"     +
+//                "}";
+//        String domin    = "https://my.tdfort.ru/index.php";
+//        String params = "page=ordersapi&action=flagstate&email=vipjonpc@mail.ru&folder=&uid=12345678&flag=" + flegs_json;
 
 
 
@@ -58,7 +61,7 @@ public class Testing {
 //        String from = "<alex_eyspb1979@mail.ru>";
 //        String from = "=?utf-8?B?0JPRg9C70Y8g0JDQu9C40LXQstCw?= <mira-eva@yandex.ru>";
 //        String from = "=?utf-8?b?0JLQsNGI0LAg0K/QvdC00LXQutGBLtCc0YPQt9GL0LrQsCDwn5GL?= <hello@yandex-team.ru>";
-        String from = "=?gbk?Q?=A7=A1=A7=D5=A7=DE=A7=DA=A7=DF=A7=DA=A7=E3=A7=E4=A7=E2=A7=D1?=";
+//        String from = "=?gbk?Q?=A7=A1=A7=D5=A7=DE=A7=DA=A7=DF=A7=DA=A7=E3=A7=E4=A7=E2=A7=D1?=";
 //
 //
 //        String from_decode = Email.getDecode(from);

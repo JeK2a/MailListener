@@ -9,6 +9,7 @@ import com.sun.mail.imap.IMAPFolder;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
@@ -67,9 +68,25 @@ public class Email {
 
     public Email(int user_id, String email_account, Message imap_message, String folder_name, IMAPFolder imapFolder) {
         try {
-            if (!imapFolder.isOpen()) {
-                imapFolder.open(Folder.READ_ONLY);
+            Store tmp_store = imapFolder.getStore();
+
+            if (!tmp_store.isConnected()) { // TODO вынести отдельно
+                Thread.sleep(1000);
+                if (!tmp_store.isConnected()) {
+                    tmp_store.connect();
+                }
             }
+
+            if (!imapFolder.isOpen()) {
+                Thread.sleep(1000);
+                if (!imapFolder.isOpen()) {
+                    imapFolder.open(IMAPFolder.READ_ONLY); // TODO javax.mail.MessagingException: * BYE JavaMail Exception: java.net.SocketException: Connection or outbound has closed; || This operation is not allowed on an open folder
+                }
+            }
+
+//            if (!imapFolder.isOpen()) { // TODO old
+//                imapFolder.open(Folder.READ_ONLY);
+//            }
 
             // TODO проверка на открытую папку
 
@@ -166,19 +183,19 @@ public class Email {
                 return responses[0].toString();
             });
 
-            if (out.contains("\\Deleted"))     { this.deleted = 1; }
-            if (out.contains("\\Answered"))    { this.answred = 1; }
-            if (out.contains("\\Draft"))       { this.draft   = 1; }
-            if (out.contains("\\Flagged"))     { this.flagged = 1; }
+            if (out.contains("\\Deleted"))      { this.deleted = 1;        }
+            if (out.contains("\\Answered"))     { this.answred = 1;        }
+            if (out.contains("\\Draft"))        { this.draft   = 1;        }
+            if (out.contains("\\Flagged"))      { this.flagged = 1;        }
 //            if (out.contains("\\Recent"))      { this.recent  = 1; }
-            if (out.contains("\\Seen"))        { this.seen    = 1; }
+            if (out.contains("\\Seen"))         { this.seen    = 1;        }
 //            if (out.contains("\\User"))        { this.user    = 1; }
-            if (out.contains("$Forvard"))      { this.forwarded = 1; }
-            if (out.contains("$label1"))       { this.label1  = 1; }
-            if (out.contains("$label2"))       { this.label2  = 1; }
-            if (out.contains("$label3"))       { this.label3  = 1; }
-            if (out.contains("$label4"))       { this.label4  = 1; }
-            if (out.contains("$label5"))       { this.label5  = 1; }
+            if (out.contains("$Forvard"))       { this.forwarded = 1;      }
+            if (out.contains("$label1"))        { this.label1  = 1;        }
+            if (out.contains("$label2"))        { this.label2  = 1;        }
+            if (out.contains("$label3"))        { this.label3  = 1;        }
+            if (out.contains("$label4"))        { this.label4  = 1;        }
+            if (out.contains("$label5"))        { this.label5  = 1;        }
             if (out.contains("$HasAttachment")) { this.has_attachment = 1; }
 
 //            Date sent = message.getSentDate();         // когда отправлено

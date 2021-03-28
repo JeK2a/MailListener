@@ -214,7 +214,7 @@ public class Mailing implements Runnable {
             if (imap_folder.isOpen()) {
                 myFolder.incrementCount_restart_noop();
             } else {
-                Store tmp_store = imap_folder.getStore();
+                Store tmp_store = imap_folder.getStore(); // TODO вынести отдельно
                 if (!tmp_store.isConnected()) {
                     Thread.sleep(1000);
                     if (!tmp_store.isConnected()) {

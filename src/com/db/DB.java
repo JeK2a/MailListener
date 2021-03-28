@@ -30,6 +30,7 @@ public class DB implements AutoCloseable {
         "useUnicode=true",
         "characterEncoding=utf-8"
     };
+
     private static Connection con;
     private static int count_errors  = 0;
     public  static int count_queries = 0;
@@ -238,10 +239,12 @@ public class DB implements AutoCloseable {
         } catch (com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException e) {
             e.printStackTrace();
             System.err.println(query);
+            System.err.println(email);
         } catch (Exception e) {
             System.err.println("addEmail error"); // TODO tmp
-            System.err.println(query);
             e.printStackTrace();
+            System.err.println(query);
+            System.err.println(email);
 
             return reAddEmail(email);
         }
