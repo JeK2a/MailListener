@@ -1,4 +1,4 @@
-package com.db;
+package com.test;
 
 import com.service.SettingsMail;
 

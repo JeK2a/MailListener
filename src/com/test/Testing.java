@@ -1,4 +1,4 @@
-package com;
+package com.test;
 
 import com.classes.*;
 import com.db.DB;

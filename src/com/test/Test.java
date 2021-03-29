@@ -1,5 +1,6 @@
-package com;
+package com.test;
 
+import com.Main;
 import com.classes.Email;
 import com.classes.EmailAccount;
 import com.classes.User;

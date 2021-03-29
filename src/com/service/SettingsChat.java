@@ -66,16 +66,16 @@ public class SettingsChat {
                 String text = textNode.getData().trim();
 
                 switch (childElement.getTagName()) {
+                    case "port"            : port           = Integer.parseInt(text); break;
+                    case "size_history"    : sizeHistory    = Integer.parseInt(text); break;
+                    case "size_max_clients": sizeMaxClients = Integer.parseInt(text); break;
                     case "server_pc"       :
                         try {
-                            nameServerPC   = InetAddress.getLocalHost().getHostName();
+                            nameServerPC = InetAddress.getLocalHost().getHostName();
                         } catch (UnknownHostException e) {
                             System.err.println(e);
                         }
                         break;
-                    case "port"            : port           = Integer.parseInt(text); break;
-                    case "size_history"    : sizeHistory    = Integer.parseInt(text); break;
-                    case "size_max_clients": sizeMaxClients = Integer.parseInt(text); break;
                 }
             }
         }

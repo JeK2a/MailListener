@@ -1,4 +1,4 @@
-package com;
+package com.test;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;

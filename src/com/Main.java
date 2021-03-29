@@ -51,6 +51,7 @@ public class Main {
 
                 ThreadGroup rootGroup = Thread.currentThread().getThreadGroup();
                 ThreadGroup parent;
+
                 while ((parent = rootGroup.getParent()) != null) {
                     rootGroup = parent;
                 }
@@ -79,7 +80,6 @@ public class Main {
 
     // List all threads and recursively list all subgroup
     public static void countThreads(ThreadGroup group, String indent) { // TODO раскоментировать
-
         int nt = group.activeCount();
         Thread[] threads = new Thread[nt * 2 + 10];
         nt = group.enumerate(threads, false);

@@ -289,11 +289,11 @@ public class DB implements AutoCloseable {
             "       `users`.`email_provider` = `settings`.`provider` AND " +
             "       `settings`.`type` = 'imap'  " +
             "WHERE " +
-//            "   `users`.`id` = 304 " +
+            "   `users`.`id` = 304 " +
 //                "   `id` = 538 " +
 //            "   `users`.`email` = \"sl@tdfort.ru\" " +
 //            "   `users`.`email` = \"me@tdfort.ru\" " +
-            "   `users`.`is_monitoring` = 1 " +
+//            "   `users`.`is_monitoring` = 1 " +
             "ORDER  BY `users`.`email`;"
 //                +
 //                "`success` = 1"

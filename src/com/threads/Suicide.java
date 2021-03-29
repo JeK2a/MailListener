@@ -2,6 +2,8 @@ package com.threads;
 
 import com.wss.WSSChatClient;
 
+import java.lang.management.ManagementFactory;
+
 public class Suicide implements Runnable {
 
     public static long timer = 0;
@@ -20,13 +22,11 @@ public class Suicide implements Runnable {
         wssChatClient.connectToWSS();
 
         while (true) {
-//            System.out.print(" timer " + ++timer + " (" + Thread.activeCount() + ") "); // TODO on
+            System.out.println(" timer " + ++timer + " (" + Thread.activeCount() + ") "); // TODO on
 
-//            System.out.print(" (" + Thread.activeCount() + "," + ManagementFactory.getThreadMXBean().getThreadCount() + "," + ManagementFactory.getRuntimeMXBean().getName() + "," + ManagementFactory.getMemoryMXBean().getObjectPendingFinalizationCount() + ") ");
-//            System.out.println();
-//            System.out.println(ManagementFactory.getClassLoadingMXBean().getLoadedClassCount() + "/" + ManagementFactory.getClassLoadingMXBean().getTotalLoadedClassCount() + "/"+ManagementFactory.getClassLoadingMXBean().getUnloadedClassCount());
-//            System.out.println(ManagementFactory.getMemoryMXBean().getHeapMemoryUsage());
-//            System.out.println(ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed() / 1024 / 1024);
+            System.out.println(" (" + Thread.activeCount() + "," + ManagementFactory.getThreadMXBean().getThreadCount() + "," + ManagementFactory.getRuntimeMXBean().getName() + "," + ManagementFactory.getMemoryMXBean().getObjectPendingFinalizationCount() + ") ");
+            System.out.println(ManagementFactory.getClassLoadingMXBean().getLoadedClassCount() + "/" + ManagementFactory.getClassLoadingMXBean().getTotalLoadedClassCount() + "/"+ManagementFactory.getClassLoadingMXBean().getUnloadedClassCount());
+            System.out.println(ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed() / 1024 / 1024);
 
 //            if (timer++ > time_limit || Thread.activeCount() > 4000) {
             if (Thread.activeCount() > 4000) {

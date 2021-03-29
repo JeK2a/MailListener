@@ -65,13 +65,10 @@ public class SettingsMail {
                     case "usessl"            : usessl            = text; break;
                     case "useunicode"        : useunicode        = text; break;
                     case "characterencoding" : characterencoding = text; break;
-
                     case "table_users"       : table_users       = text; break;
                     case "table_emails"      : table_emails      = text; break;
-
                     case "mail_debug"        : mail_debug        = text; break;
                     case "session_debug"     : session_debug     = Boolean.parseBoolean(text); break;
-
                     case "wait_folder"       : wait_folder       = Boolean.parseBoolean(text); break;
                     case "wait_user"         : wait_user         = Boolean.parseBoolean(text); break;
                 }
